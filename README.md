@@ -2,7 +2,7 @@
 
 A full-featured React web application built as a comprehensive fan destination for the 2026 FIFA World Cup. Features a live-style match center, interactive 3D globe, country profiles, all-time records with expandable leaderboards, historical moments with in-modal YouTube video, and multiple monetization integrations.
 
-**Live site:** `[your-vercel-url]`
+**Live site:** https://worldcup-site.vercel.app
 
 ---
 
