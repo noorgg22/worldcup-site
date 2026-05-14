@@ -127,4 +127,4 @@ Built affiliate-ready with four revenue streams:
 ## Author
 
 **Gui Trindade**  
-[GitHub](https://github.com/YOUR_USERNAME) · [LinkedIn](https://linkedin.com/in/YOUR_LINKEDIN)
+[GitHub](https://github.com/noorgg22) · [LinkedIn](https://linkedin.com/in/YOUR_LINKEDIN)
