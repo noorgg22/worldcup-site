@@ -241,59 +241,6 @@ export default function VenuePage({ venue, onBack }: Props) {
           </div>
         </div>
 
-        {/* ── Hotel affiliate banner ───────────────────────────────── */}
-        {/* Booking.com affiliate: sign up at booking.com/affiliate-program
-            Replace YOUR_AFFILIATE_ID in the link below with your affiliate ID */}
-        <div style={{
-          marginTop: 28,
-          background: 'linear-gradient(135deg, rgba(0,119,200,0.12) 0%, rgba(0,80,160,0.08) 100%)',
-          border: '1px solid rgba(0,140,255,0.2)',
-          borderRadius: 16, padding: '24px 28px',
-          display: 'flex', alignItems: 'center', gap: 24,
-        }}>
-          {/* Icon + text */}
-          <div style={{ fontSize: 36, flexShrink: 0 }}>🏨</div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{
-              fontSize: 10, fontWeight: 700, letterSpacing: '0.15em',
-              textTransform: 'uppercase', color: '#4fc3f7', marginBottom: 6,
-            }}>
-              Travelling to {venue.city}?
-            </div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--white)', lineHeight: 1, marginBottom: 6 }}>
-              FIND HOTELS NEAR {venue.stadium.toUpperCase()}
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-              Book early — World Cup dates sell out fast. Compare prices near the stadium.
-            </div>
-          </div>
-
-          {/* CTA */}
-          <a
-            href={`https://www.booking.com/searchresults.html?ss=${encodeURIComponent(venue.city)}&aid=YOUR_AFFILIATE_ID`}
-            target="_blank"
-            rel="noopener noreferrer sponsored"
-            style={{
-              flexShrink: 0,
-              background: '#003580',
-              border: '1px solid rgba(0,140,255,0.4)',
-              color: '#fff',
-              fontFamily: 'var(--font-display)',
-              fontSize: 15,
-              letterSpacing: '0.08em',
-              padding: '13px 26px',
-              borderRadius: 10,
-              textDecoration: 'none',
-              whiteSpace: 'nowrap',
-              boxShadow: '0 4px 24px rgba(0,53,128,0.4)',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = '#004aad'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = '#003580'; }}
-          >
-            Search Hotels ↗
-          </a>
-        </div>
       </div>
     </div>
   );
