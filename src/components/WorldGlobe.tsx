@@ -95,10 +95,23 @@ const markers = mockTeams
     size: 0.5,
   }));
 
-export default function WorldGlobe({ onCountryClick }: { onCountryClick?: (name: string) => void }) {
-  const globeEl = useRef<any>(null);
-  const [countries, setCountries] = useState<any[]>([]);
+export default function WorldGlobe({ onCountryClick, size }: { onCountryClick?: (name: string) => void; size?: number }) {
+  const globeEl      = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerW, setContainerW] = useState(size ?? 600);
+  const [countries, setCountries]   = useState<any[]>([]);
   const [hoveredCountry, setHoveredCountry] = useState<any>(null);
+
+  // Responsive: measure container width if no fixed size given
+  useEffect(() => {
+    if (size) return;
+    const update = () => {
+      if (containerRef.current) setContainerW(containerRef.current.clientWidth);
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, [size]);
 
   // Fetch world GeoJSON on mount
   useEffect(() => {
@@ -212,11 +225,14 @@ export default function WorldGlobe({ onCountryClick }: { onCountryClick?: (name:
     `;
   }, []);
 
+  const globeSize = size ?? containerW;
+
   return (
+    <div ref={containerRef} style={{ width: size ? `${size}px` : '100%' }}>
     <Globe
       ref={globeEl}
-      width={600}
-      height={600}
+      width={globeSize}
+      height={globeSize}
       backgroundColor="rgba(0,0,0,0)"
       globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
       atmosphereColor="#f5c842"
@@ -243,5 +259,6 @@ export default function WorldGlobe({ onCountryClick }: { onCountryClick?: (name:
       pointAltitude={0.02}
       pointLabel={(d: any) => `<div style="background:rgba(8,12,20,0.85);border:1px solid ${d.color};color:#fff;padding:5px 10px;border-radius:6px;font-family:Inter,sans-serif;font-size:12px;font-weight:600;white-space:nowrap">${d.name} <span style="color:${d.color};font-size:10px">GROUP ${d.group}</span></div>`}
     />
+    </div>
   );
 }

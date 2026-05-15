@@ -259,6 +259,41 @@ export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: 
         )}
       </div>
 
+      {/* ── MOBILE GLOBE — below hero text ───────────────────────── */}
+      {isMobile && (
+        <div style={{
+          position: 'relative', overflow: 'hidden',
+          marginTop: -20, marginBottom: -40,
+        }}>
+          {/* Gold ambient glow */}
+          <div style={{
+            position: 'absolute', inset: 0, pointerEvents: 'none',
+            background: 'radial-gradient(ellipse at center, rgba(245,200,66,0.06) 0%, transparent 70%)',
+          }} />
+          <Suspense fallback={
+            <div style={{ height: 320, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>Loading globe...</div>
+            </div>
+          }>
+            <WorldGlobe onCountryClick={onCountryClick} />
+          </Suspense>
+          {/* Bottom fade into next section */}
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: 80,
+            background: 'linear-gradient(to top, var(--bg) 0%, transparent 100%)',
+            pointerEvents: 'none',
+          }} />
+          {/* Hint text */}
+          <div style={{
+            position: 'absolute', bottom: 12, left: 0, right: 0,
+            textAlign: 'center', fontSize: 10, color: 'var(--text-muted)',
+            letterSpacing: '0.1em', textTransform: 'uppercase', pointerEvents: 'none',
+          }}>
+            Tap a country to view profile
+          </div>
+        </div>
+      )}
+
       {/* ── TOURNAMENT AT A GLANCE ───────────────────────────────── */}
       <section style={{ maxWidth: 1100, margin: '0 auto', padding: isMobile ? '0 16px 60px' : '0 24px 80px' }}>
         {/* Host nations banner */}
