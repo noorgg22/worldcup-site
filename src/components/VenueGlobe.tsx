@@ -178,50 +178,85 @@ export default function VenueGlobe({ onVenueNav }: Props) {
   return (
     <div
       ref={containerRef}
-      style={{ position: 'relative', width: '100%', overflow: 'hidden', background: '#06090f' }}
+      style={{ position: 'relative', width: '100%', background: '#06090f' }}
     >
-      {/* ── Header overlay ────────────────────────────────────────────────────── */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10,
-        padding: isMobile ? '16px 20px' : '36px 48px', pointerEvents: 'none',
-        background: 'linear-gradient(to bottom, rgba(6,9,15,0.96) 0%, rgba(6,9,15,0.5) 60%, transparent 100%)',
-      }}>
+      {/* ── Mobile header — above the globe, not overlaid ──────────────────── */}
+      {isMobile && (
         <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          marginBottom: isMobile ? 6 : 12,
-          background: 'rgba(245,200,66,0.08)', border: '1px solid rgba(245,200,66,0.2)',
-          borderRadius: 100, padding: '4px 12px',
+          padding: '16px 20px 12px',
+          background: 'linear-gradient(180deg, #06090f 0%, rgba(6,9,15,0.9) 100%)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
         }}>
-          <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#f5c842', display: 'inline-block' }} />
-          <span style={{ fontSize: 9, color: '#f5c842', letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 600 }}>
-            16 Venues · 3 Nations
-          </span>
+          {/* Left: title + hint */}
+          <div>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 6,
+              background: 'rgba(245,200,66,0.08)', border: '1px solid rgba(245,200,66,0.2)',
+              borderRadius: 100, padding: '3px 10px',
+            }}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#f5c842', display: 'inline-block' }} />
+              <span style={{ fontSize: 9, color: '#f5c842', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 600 }}>
+                16 Venues · 3 Nations
+              </span>
+            </div>
+            <h2 style={{
+              fontFamily: 'var(--font-display)', fontSize: 26,
+              color: '#fff', letterSpacing: '0.06em', lineHeight: 1, margin: '0 0 4px',
+            }}>
+              MATCH VENUES
+            </h2>
+            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, margin: 0 }}>
+              Tap a dot to explore the venue
+            </p>
+          </div>
+          {/* Right: legend */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
+            {(['USA', 'Canada', 'Mexico'] as const).map(c => (
+              <div key={c} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: COUNTRY_COLOR[c], boxShadow: `0 0 6px ${COUNTRY_COLOR[c]}`, flexShrink: 0 }} />
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)', fontWeight: 600 }}>{c}</span>
+              </div>
+            ))}
+          </div>
         </div>
-        <h2 style={{
-          fontFamily: 'var(--font-display)', fontSize: isMobile ? 28 : 'clamp(28px,4vw,52px)',
-          color: '#fff', letterSpacing: '0.06em', lineHeight: 1, margin: 0,
+      )}
+
+      {/* ── Desktop header overlay ──────────────────────────────────────────── */}
+      {!isMobile && (
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10,
+          padding: '36px 48px', pointerEvents: 'none',
+          background: 'linear-gradient(to bottom, rgba(6,9,15,0.92) 0%, transparent 100%)',
         }}>
-          MATCH VENUES
-        </h2>
-        {!isMobile && (
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 12,
+            background: 'rgba(245,200,66,0.08)', border: '1px solid rgba(245,200,66,0.2)',
+            borderRadius: 100, padding: '5px 14px',
+          }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#f5c842', display: 'inline-block' }} />
+            <span style={{ fontSize: 10, color: '#f5c842', letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 600 }}>
+              16 Venues · 3 Nations
+            </span>
+          </div>
+          <h2 style={{
+            fontFamily: 'var(--font-display)', fontSize: 'clamp(28px,4vw,52px)',
+            color: '#fff', letterSpacing: '0.06em', lineHeight: 1, margin: 0,
+          }}>
+            MATCH VENUES
+          </h2>
           <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12, marginTop: 6 }}>
             Hover a stadium to preview · Click to explore
           </p>
-        )}
-        {isMobile && (
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, marginTop: 4 }}>
-            Tap a dot to explore the venue
-          </p>
-        )}
-        <div style={{ display: 'flex', gap: isMobile ? 12 : 18, marginTop: isMobile ? 8 : 16 }}>
-          {(['USA', 'Canada', 'Mexico'] as const).map(c => (
-            <div key={c} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: COUNTRY_COLOR[c], boxShadow: `0 0 6px ${COUNTRY_COLOR[c]}`, flexShrink: 0 }} />
-              <span style={{ fontSize: isMobile ? 10 : 11, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{c}</span>
-            </div>
-          ))}
+          <div style={{ display: 'flex', gap: 18, marginTop: 16 }}>
+            {(['USA', 'Canada', 'Mexico'] as const).map(c => (
+              <div key={c} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                <div style={{ width: 10, height: 10, borderRadius: '50%', background: COUNTRY_COLOR[c], boxShadow: `0 0 8px ${COUNTRY_COLOR[c]}` }} />
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{c}</span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Globe ─────────────────────────────────────────────────────────────── */}
       {/* pointsData drives hover/click via built-in THREE.js raycasting.       */}

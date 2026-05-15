@@ -740,6 +740,7 @@ function ThisDayWidget({ onViewAll }: { onViewAll: () => void }) {
 
 // ── Fixture Card ──────────────────────────────────────────────────────────────
 function FixtureCard({ fixture: f, groupColor: gc }: { fixture: Fixture; groupColor: string }) {
+  const isMobile = useIsMobile();
   const [showTickets, setShowTickets] = useState(false);
   const [photoUrl, setPhotoUrl] = useState<string | null | undefined>(undefined);
   const ticketSearch = encodeURIComponent(`${f.home.name} ${f.away.name} World Cup 2026`);
@@ -757,60 +758,95 @@ function FixtureCard({ fixture: f, groupColor: gc }: { fixture: Fixture; groupCo
         onClick={() => setShowTickets(true)}
         style={{
           background: 'var(--bg-card)', border: '1px solid var(--border)',
-          borderRadius: 14, padding: '16px 20px',
-          display: 'flex', alignItems: 'center', gap: 16,
+          borderLeft: `3px solid ${gc}`,
+          borderRadius: 14, overflow: 'hidden',
           transition: 'all 0.2s', cursor: 'pointer',
         }}
         onMouseEnter={e => {
           const el = e.currentTarget as HTMLDivElement;
-          el.style.borderColor = `${gc}40`;
+          el.style.borderColor = `${gc}60`;
           el.style.background = `${gc}06`;
         }}
         onMouseLeave={e => {
           const el = e.currentTarget as HTMLDivElement;
           el.style.borderColor = 'var(--border)';
+          el.style.borderLeftColor = gc;
           el.style.background = 'var(--bg-card)';
         }}
       >
-        {/* Date/time */}
-        <div style={{ textAlign: 'center', minWidth: 48, flexShrink: 0 }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, color: 'var(--white)', lineHeight: 1 }}>{f.date}</div>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 3 }}>{f.time}</div>
-        </div>
-
-        {/* Divider */}
-        <div style={{ width: 1, height: 36, background: 'var(--border)', flexShrink: 0 }} />
-
-        {/* Teams */}
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
-          <Flag emoji={f.home.flag} size={20} />
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--white)', textAlign: 'right', flex: 1 }}>{f.home.name}</span>
-          <span style={{
-            fontFamily: 'var(--font-display)', fontSize: 12, color: 'var(--text-muted)',
-            background: 'rgba(255,255,255,0.05)', borderRadius: 4, padding: '2px 8px',
-          }}>VS</span>
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--white)', flex: 1 }}>{f.away.name}</span>
-          <Flag emoji={f.away.flag} size={20} />
-        </div>
-
-        {/* Divider */}
-        <div style={{ width: 1, height: 36, background: 'var(--border)', flexShrink: 0 }} />
-
-        {/* Group + venue + ticket hint */}
-        <div style={{ textAlign: 'right', minWidth: 90, flexShrink: 0 }}>
-          <div style={{
-            display: 'inline-block', background: `${gc}20`,
-            border: `1px solid ${gc}40`, borderRadius: 4,
-            fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: gc,
-            padding: '2px 7px', marginBottom: 4,
-          }}>
-            GRP {f.group}
+        {isMobile ? (
+          /* ── MOBILE layout ── */
+          <div style={{ padding: '12px 14px' }}>
+            {/* Top row: date + group badge */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--white)' }}>{f.date}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{f.time}</div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{
+                  background: `${gc}20`, border: `1px solid ${gc}40`, borderRadius: 4,
+                  fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: gc, padding: '2px 7px',
+                }}>GRP {f.group}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{f.city}</div>
+              </div>
+            </div>
+            {/* Teams row */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                <Flag emoji={f.home.flag} size={22} style={{ flexShrink: 0 }} />
+                <span style={{
+                  fontSize: 14, fontWeight: 700, color: 'var(--white)',
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>{f.home.name}</span>
+              </div>
+              <span style={{
+                fontFamily: 'var(--font-display)', fontSize: 11, color: 'var(--text-muted)',
+                background: 'rgba(255,255,255,0.06)', borderRadius: 4, padding: '3px 8px',
+                flexShrink: 0,
+              }}>VS</span>
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end', minWidth: 0 }}>
+                <span style={{
+                  fontSize: 14, fontWeight: 700, color: 'var(--white)', textAlign: 'right',
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>{f.away.name}</span>
+                <Flag emoji={f.away.flag} size={22} style={{ flexShrink: 0 }} />
+              </div>
+            </div>
           </div>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{f.city}</div>
-          <div style={{ fontSize: 9, color: 'var(--gold)', opacity: 0.7, marginTop: 3, letterSpacing: '0.06em' }}>
-            🎟 Get Tickets
+        ) : (
+          /* ── DESKTOP layout ── */
+          <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 16 }}>
+            {/* Date/time */}
+            <div style={{ textAlign: 'center', minWidth: 48, flexShrink: 0 }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, color: 'var(--white)', lineHeight: 1 }}>{f.date}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 3 }}>{f.time}</div>
+            </div>
+            <div style={{ width: 1, height: 36, background: 'var(--border)', flexShrink: 0 }} />
+            {/* Teams */}
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
+              <Flag emoji={f.home.flag} size={20} />
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--white)', textAlign: 'right', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.home.name}</span>
+              <span style={{
+                fontFamily: 'var(--font-display)', fontSize: 12, color: 'var(--text-muted)',
+                background: 'rgba(255,255,255,0.05)', borderRadius: 4, padding: '2px 8px', flexShrink: 0,
+              }}>VS</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--white)', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.away.name}</span>
+              <Flag emoji={f.away.flag} size={20} />
+            </div>
+            <div style={{ width: 1, height: 36, background: 'var(--border)', flexShrink: 0 }} />
+            {/* Group + venue */}
+            <div style={{ textAlign: 'right', minWidth: 90, flexShrink: 0 }}>
+              <div style={{
+                display: 'inline-block', background: `${gc}20`,
+                border: `1px solid ${gc}40`, borderRadius: 4,
+                fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: gc, padding: '2px 7px', marginBottom: 4,
+              }}>GRP {f.group}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{f.city}</div>
+              <div style={{ fontSize: 9, color: 'var(--gold)', opacity: 0.7, marginTop: 3, letterSpacing: '0.06em' }}>🎟 Get Tickets</div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* ── Ticket modal ──────────────────────────────────────── */}
