@@ -283,3 +283,24 @@ h1, h2, h3, h4 {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ── Mobile responsive overrides ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+
+  .page-hero {
+    padding: 36px 16px 24px;
+  }
+
+  /* Prevent any fixed-width element from causing horizontal scroll */
+  img, iframe, video {
+    max-width: 100%;
+  }
+
+  /* Touch-friendly tap targets */
+  button {
+    min-height: 40px;
+  }
+}

@@ -1,16 +1,18 @@
 import { mockStandings } from '../mock/standings';
 import type { StandingsRow } from '../types';
 import PageFooter from '../components/PageFooter';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 const GROUPS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
 
 export default function GroupsPage({ onCountryClick }: { onCountryClick?: (name: string) => void }) {
+  const isMobile = useIsMobile();
   const byGroup = (g: string) => mockStandings.filter(r => r.team.group === g);
 
   return (
-    <div style={{ paddingTop: 64, maxWidth: 1200, margin: '0 auto', padding: '80px 24px' }}>
+    <div style={{ paddingTop: 64, maxWidth: 1200, margin: '0 auto', padding: isMobile ? '80px 16px 40px' : '80px 24px' }}>
       {/* Header */}
-      <div style={{ marginBottom: 48 }}>
+      <div style={{ marginBottom: isMobile ? 28 : 48 }}>
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 16,
           background: 'rgba(245,200,66,0.08)', border: '1px solid rgba(245,200,66,0.2)',
@@ -20,7 +22,7 @@ export default function GroupsPage({ onCountryClick }: { onCountryClick?: (name:
             48 Teams · 12 Groups
           </span>
         </div>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 52, color: 'var(--white)', marginBottom: 8 }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 36 : 52, color: 'var(--white)', marginBottom: 8 }}>
           GROUP STAGE
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>
@@ -28,8 +30,8 @@ export default function GroupsPage({ onCountryClick }: { onCountryClick?: (name:
         </p>
       </div>
 
-      {/* Groups grid — 3 columns */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+      {/* Groups grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(340px, 1fr))', gap: isMobile ? 14 : 20 }}>
         {GROUPS.map(g => (
           <GroupTable key={g} group={g} rows={byGroup(g)} onCountryClick={onCountryClick} />
         ))}

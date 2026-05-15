@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, Suspense, lazy } from 'react';
+import { useIsMobile } from '../hooks/useIsMobile';
 import { venuesByCountry, venues as ALL_VENUES } from '../data/venues';
 import type { Venue } from '../data/venues';
 import { getTodayOrNearestMoments, CATEGORY_COLORS, CATEGORY_LABELS } from '../data/wcHistory';
@@ -117,6 +118,7 @@ const MILESTONES = [
 ];
 
 export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: Props) {
+  const isMobile = useIsMobile();
   const countdown = useCountdown();
 
   return (
@@ -124,10 +126,11 @@ export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: 
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <div style={{
-        position: 'relative', minHeight: '100vh',
-        display: 'grid', gridTemplateColumns: '1fr 1fr',
+        position: 'relative', minHeight: isMobile ? 'auto' : '100vh',
+        display: 'grid',
+        gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
         alignItems: 'center', overflow: 'hidden',
-        padding: '0 60px',
+        padding: isMobile ? '32px 20px 40px' : '0 60px',
       }}>
         {/* Ambient background */}
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
@@ -149,7 +152,7 @@ export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: 
         </div>
 
         {/* LEFT — Text */}
-        <div style={{ position: 'relative', zIndex: 1, paddingRight: 40 }}>
+        <div style={{ position: 'relative', zIndex: 1, paddingRight: isMobile ? 0 : 40 }}>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 24,
             background: 'rgba(245,200,66,0.08)', border: '1px solid rgba(245,200,66,0.25)',
@@ -233,34 +236,36 @@ export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: 
           </div>
         </div>
 
-        {/* RIGHT — Globe */}
-        <div style={{
-          position: 'relative', zIndex: 1,
-          display: 'flex', justifyContent: 'center', alignItems: 'center',
-        }}>
+        {/* RIGHT — Globe (desktop only) */}
+        {!isMobile && (
           <div style={{
-            position: 'absolute', width: 500, height: 500, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(245,200,66,0.08) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          }} />
-          <Suspense fallback={
-            <div style={{ width: 600, height: 600, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>Loading globe...</div>
-            </div>
-          }>
-            <WorldGlobe onCountryClick={onCountryClick} />
-          </Suspense>
-        </div>
+            position: 'relative', zIndex: 1,
+            display: 'flex', justifyContent: 'center', alignItems: 'center',
+          }}>
+            <div style={{
+              position: 'absolute', width: 500, height: 500, borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(245,200,66,0.08) 0%, transparent 70%)',
+              pointerEvents: 'none',
+            }} />
+            <Suspense fallback={
+              <div style={{ width: 600, height: 600, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>Loading globe...</div>
+              </div>
+            }>
+              <WorldGlobe onCountryClick={onCountryClick} />
+            </Suspense>
+          </div>
+        )}
       </div>
 
       {/* ── TOURNAMENT AT A GLANCE ───────────────────────────────── */}
-      <section style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 80px' }}>
+      <section style={{ maxWidth: 1100, margin: '0 auto', padding: isMobile ? '0 16px 60px' : '0 24px 80px' }}>
         {/* Host nations banner */}
         <div style={{
           background: 'linear-gradient(135deg, rgba(245,200,66,0.08) 0%, rgba(255,255,255,0.03) 50%, rgba(79,195,247,0.06) 100%)',
           border: '1px solid rgba(245,200,66,0.2)',
-          borderRadius: 20, padding: '32px 40px', marginBottom: 20,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24,
+          borderRadius: 20, padding: isMobile ? '20px 20px' : '32px 40px', marginBottom: 20,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16,
         }}>
           <div>
             <div style={{ fontSize: 10, color: 'var(--text-muted)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 12 }}>Host Nations · Hover to explore venues</div>
@@ -291,7 +296,7 @@ export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: 
         }}>
           {/* Row 1: key numbers */}
           <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)',
+            display: 'grid', gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : 'repeat(6, 1fr)',
             borderBottom: '1px solid var(--border)',
           }}>
             {[
@@ -303,8 +308,11 @@ export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: 
               { val: 'Jul 19', label: 'The Final' },
             ].map((s, i) => (
               <div key={s.label} style={{
-                padding: '20px 0', textAlign: 'center',
-                borderRight: i < 5 ? '1px solid var(--border)' : 'none',
+                padding: isMobile ? '16px 0' : '20px 0', textAlign: 'center',
+                borderRight: isMobile
+                  ? (i % 3 < 2 ? '1px solid var(--border)' : 'none')
+                  : (i < 5 ? '1px solid var(--border)' : 'none'),
+                borderBottom: isMobile && i < 3 ? '1px solid var(--border)' : 'none',
               }}>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: 'var(--gold)', lineHeight: 1, marginBottom: 4 }}>{s.val}</div>
                 <div style={{ fontSize: 10, color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{s.label}</div>
@@ -350,7 +358,7 @@ export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: 
           </div>
 
           {/* Row 3: road to the final — compact timeline */}
-          <div style={{ padding: '20px 32px' }}>
+          <div style={{ padding: isMobile ? '16px 16px' : '20px 32px', overflowX: isMobile ? 'auto' : 'visible' }}>
             <div style={{ fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 16 }}>
               Road to the Final
             </div>
@@ -391,10 +399,10 @@ export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: 
       </section>
 
       {/* ── OPENING FIXTURES ─────────────────────────────────────── */}
-      <section style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 80px' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 28 }}>
+      <section style={{ maxWidth: 1100, margin: '0 auto', padding: isMobile ? '0 16px 60px' : '0 24px 80px' }}>
+        <div style={{ display: 'flex', alignItems: isMobile ? 'flex-start' : 'baseline', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', gap: 12, marginBottom: isMobile ? 16 : 28 }}>
           <div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 38, color: 'var(--white)', marginBottom: 6 }}>OPENING FIXTURES</h2>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 28 : 38, color: 'var(--white)', marginBottom: 6 }}>OPENING FIXTURES</h2>
             <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>First week of group stage · All times local</p>
           </div>
           <button onClick={() => onNav('groups')} style={{
@@ -406,7 +414,7 @@ export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: 
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
           {OPENING_FIXTURES.map(f => {
             const gc = GROUP_COLORS[f.group] || '#f5c842';
             return (
@@ -421,13 +429,13 @@ export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: 
 
 
       {/* ── MUST-WATCH MATCHUPS ───────────────────────────────────── */}
-      <section style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 100px' }}>
-        <div style={{ marginBottom: 28 }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 38, color: 'var(--white)', marginBottom: 6 }}>MATCHUPS TO WATCH</h2>
+      <section style={{ maxWidth: 1100, margin: '0 auto', padding: isMobile ? '0 16px 60px' : '0 24px 100px' }}>
+        <div style={{ marginBottom: isMobile ? 16 : 28 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 28 : 38, color: 'var(--white)', marginBottom: 6 }}>MATCHUPS TO WATCH</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Can't-miss clashes of the group stage</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: isMobile ? 12 : 16 }}>
           {MARQUEE.map(m => {
             const gc = GROUP_COLORS[m.group];
             return (
@@ -531,9 +539,9 @@ function ThisDayWidget({ onViewAll }: { onViewAll: () => void }) {
       )}
 
       {/* Section header */}
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12, marginBottom: 24 }}>
         <div>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 38, color: 'var(--white)', marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(22px, 5vw, 38px)', color: 'var(--white)', marginBottom: 6 }}>
             {isToday ? 'THIS DAY IN WORLD CUP HISTORY' : 'ON THIS DATE IN WORLD CUP HISTORY'}
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>
@@ -556,7 +564,7 @@ function ThisDayWidget({ onViewAll }: { onViewAll: () => void }) {
       {/* Hero moment card */}
       <div style={{
         background: 'var(--bg-card)', border: `1px solid ${catColor}30`,
-        borderRadius: 20, padding: '32px 36px',
+        borderRadius: 20, padding: 'clamp(20px, 4vw, 32px) clamp(16px, 4vw, 36px)',
         position: 'relative', overflow: 'hidden', marginBottom: rest.length > 0 ? 12 : 0,
       }}>
         <div style={{

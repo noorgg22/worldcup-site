@@ -29,13 +29,14 @@ export default function PageFooter() {
 
       {/* Placeholder shown until AdSense is activated */}
       <div style={{
-        maxWidth: 728, margin: '0 auto 32px',
+        width: '100%', maxWidth: 728, margin: '0 auto 32px',
         height: 90,
         background: 'rgba(255,255,255,0.03)',
         border: '1px dashed rgba(255,255,255,0.1)',
         borderRadius: 8,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         color: 'rgba(255,255,255,0.2)', fontSize: 11, letterSpacing: '0.1em',
+        boxSizing: 'border-box',
       }}>
         ADVERTISEMENT
       </div>

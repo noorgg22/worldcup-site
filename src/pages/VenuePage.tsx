@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Venue } from '../data/venues';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 interface Props {
   venue: Venue;
@@ -27,6 +28,7 @@ async function fetchWikiPhoto(wikiTitle: string): Promise<string | null> {
 }
 
 export default function VenuePage({ venue, onBack }: Props) {
+  const isMobile = useIsMobile();
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [photoLoading, setPhotoLoading] = useState(true);
   const [photoError, setPhotoError] = useState(false);
@@ -90,7 +92,7 @@ export default function VenuePage({ venue, onBack }: Props) {
         </div>
 
         {/* ── Quick stats ───────────────────────────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 28 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 12, marginBottom: 28 }}>
           {[
             { icon: '🏟️', label: 'Capacity',   value: venue.capacity.toLocaleString() },
             { icon: '⚽', label: 'WC Matches', value: `${venue.matches} games` },
@@ -112,7 +114,7 @@ export default function VenuePage({ venue, onBack }: Props) {
         </div>
 
         {/* ── Photo + Map ───────────────────────────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
 
           {/* LEFT — Stadium interior/main photo */}
           <div style={{
@@ -128,7 +130,7 @@ export default function VenuePage({ venue, onBack }: Props) {
               <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>via Wikipedia</span>
             </div>
 
-            <div style={{ position: 'relative', height: 400 }}>
+            <div style={{ position: 'relative', height: isMobile ? 240 : 400 }}>
               {/* Loading state */}
               {photoLoading && (
                 <div style={{
@@ -203,7 +205,7 @@ export default function VenuePage({ venue, onBack }: Props) {
             </div>
             <iframe
               src={satelliteOverview}
-              width="100%" height={414}
+              width="100%" height={isMobile ? 240 : 414}
               style={{ border: 'none', display: 'block' }}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"

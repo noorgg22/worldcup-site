@@ -7,12 +7,14 @@ import {
 } from '../data/wcHistory';
 import MomentModal from '../components/MomentModal';
 import PageFooter from '../components/PageFooter';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 type FilterCategory = HistoryMoment['category'] | 'all';
 
 const ALL_CATEGORIES: FilterCategory[] = ['all', 'final', 'upset', 'record', 'moment', 'controversy', 'goal'];
 
 export default function HistoryPage() {
+  const isMobile = useIsMobile();
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState<FilterCategory>('all');
   const [selected, setSelected] = useState<HistoryMoment | null>(null);
@@ -35,7 +37,7 @@ export default function HistoryPage() {
       <div style={{
         background: 'linear-gradient(180deg, rgba(245,200,66,0.07) 0%, transparent 100%)',
         borderBottom: '1px solid rgba(245,200,66,0.1)',
-        padding: '48px 40px 32px',
+        padding: isMobile ? '36px 20px 24px' : '48px 40px 32px',
         textAlign: 'center',
       }}>
         <div style={{ fontSize: 48, marginBottom: 12 }}>📖</div>
@@ -52,7 +54,7 @@ export default function HistoryPage() {
 
       {/* Filters */}
       <div style={{
-        maxWidth: 1100, margin: '0 auto', padding: '24px 40px 0',
+        maxWidth: 1100, margin: '0 auto', padding: isMobile ? '16px 16px 0' : '24px 40px 0',
         display: 'flex', flexDirection: 'column', gap: 16,
       }}>
         {/* Search */}
@@ -102,7 +104,7 @@ export default function HistoryPage() {
       </div>
 
       {/* Content: grid of cards + modal */}
-      <div style={{ maxWidth: 1100, margin: '24px auto 80px', padding: '0 40px' }}>
+      <div style={{ maxWidth: 1100, margin: '24px auto 80px', padding: isMobile ? '0 16px' : '0 40px' }}>
         {filtered.length === 0 ? (
           <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '60px 0', fontSize: 15 }}>
             No moments found for that search.
@@ -110,7 +112,7 @@ export default function HistoryPage() {
         ) : (
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(320px, 1fr))',
             gap: 16,
           }}>
             {filtered.map(m => (
