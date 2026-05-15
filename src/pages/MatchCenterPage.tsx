@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef, type ReactNode } from 'react';
+import { useIsMobile } from '../hooks/useIsMobile';
 import { ALL_MATCHES, KNOCKOUT_ROUNDS } from '../data/matches';
 import type { Match, MatchStatsFull } from '../data/matches';
 import { GROUP_COLORS } from '../data/wcStats';
@@ -80,6 +81,7 @@ const LONG_DATE: Record<string, string> = {
 };
 
 export default function MatchCenterPage({ onCountryClick, onVenueNav }: { onCountryClick?: (name: string) => void; onVenueNav?: (venue: VenueData) => void }) {
+  const isMobile = useIsMobile();
   const [roundTab, setRoundTab]       = useState<'group' | 'knockout'>('group');
   const [groupFilter, setGroupFilter] = useState<string>('all');
   const [search, setSearch]           = useState('');
@@ -119,7 +121,7 @@ export default function MatchCenterPage({ onCountryClick, onVenueNav }: { onCoun
         borderBottom: '1px solid var(--border)',
         background: 'linear-gradient(180deg, rgba(245,200,66,0.04) 0%, transparent 100%)',
       }}>
-        <div style={{ maxWidth: 1000, margin: '0 auto', padding: '48px 24px 36px' }}>
+        <div style={{ maxWidth: 1000, margin: '0 auto', padding: isMobile ? '28px 16px 24px' : '48px 24px 36px' }}>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 16,
             background: 'rgba(245,200,66,0.08)', border: '1px solid rgba(245,200,66,0.2)',
@@ -135,7 +137,7 @@ export default function MatchCenterPage({ onCountryClick, onVenueNav }: { onCoun
               MATCH CENTER
             </h1>
             {/* Quick stats */}
-            <div style={{ display: 'flex', gap: 12, paddingBottom: 6 }}>
+            <div style={{ display: 'flex', gap: isMobile ? 8 : 12, paddingBottom: 6, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
               {[
                 { val: '104', label: 'Matches' },
                 { val: '48',  label: 'Teams' },
@@ -162,10 +164,10 @@ export default function MatchCenterPage({ onCountryClick, onVenueNav }: { onCoun
         backdropFilter: 'blur(20px)',
         borderBottom: '1px solid var(--border)',
       }}>
-        <div style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px' }}>
+        <div style={{ maxWidth: 1000, margin: '0 auto', padding: isMobile ? '0 16px' : '0 24px' }}>
 
           {/* Stage toggle + search row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 0 12px' }}>
+          <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', gap: isMobile ? 10 : 12, padding: isMobile ? '12px 0 10px' : '14px 0 12px' }}>
             {/* Segmented control */}
             <div style={{
               display: 'flex',
@@ -178,6 +180,7 @@ export default function MatchCenterPage({ onCountryClick, onVenueNav }: { onCoun
                   key={tab}
                   onClick={() => { setRoundTab(tab); setGroupFilter('all'); }}
                   style={{
+                    flex: isMobile ? 1 : undefined,
                     background: roundTab === tab
                       ? 'linear-gradient(135deg, rgba(245,200,66,0.18), rgba(245,200,66,0.08))'
                       : 'transparent',
@@ -185,7 +188,7 @@ export default function MatchCenterPage({ onCountryClick, onVenueNav }: { onCoun
                     color: roundTab === tab ? 'var(--gold)' : 'var(--text-muted)',
                     fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11,
                     letterSpacing: '0.1em', textTransform: 'uppercase',
-                    padding: '7px 18px', borderRadius: 7, cursor: 'pointer',
+                    padding: '9px 18px', borderRadius: 7, cursor: 'pointer',
                     transition: 'all 0.2s', whiteSpace: 'nowrap',
                   }}
                 >
@@ -195,7 +198,7 @@ export default function MatchCenterPage({ onCountryClick, onVenueNav }: { onCoun
             </div>
 
             {/* Search */}
-            <div style={{ marginLeft: 'auto', position: 'relative' }}>
+            <div style={{ position: 'relative', flex: isMobile ? undefined : undefined, width: isMobile ? '100%' : undefined, marginLeft: isMobile ? 0 : 'auto' }}>
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
@@ -203,9 +206,10 @@ export default function MatchCenterPage({ onCountryClick, onVenueNav }: { onCoun
                 style={{
                   background: 'var(--bg-card)', border: '1px solid var(--border)',
                   color: 'var(--white)', fontFamily: 'var(--font-body)',
-                  fontSize: 13, padding: '8px 14px 8px 34px',
-                  borderRadius: 9, outline: 'none', width: 190,
-                  transition: 'border-color 0.2s',
+                  fontSize: 13, padding: '9px 14px 9px 34px',
+                  borderRadius: 9, outline: 'none',
+                  width: isMobile ? '100%' : 190,
+                  transition: 'border-color 0.2s', boxSizing: 'border-box',
                 }}
                 onFocus={e => (e.currentTarget.style.borderColor = 'rgba(245,200,66,0.35)')}
                 onBlur={e  => (e.currentTarget.style.borderColor = 'var(--border)')}
@@ -275,7 +279,7 @@ export default function MatchCenterPage({ onCountryClick, onVenueNav }: { onCoun
       </div>
 
       {/* ── Match list ─────────────────────────────────────────── */}
-      <div style={{ maxWidth: 1000, margin: '0 auto', padding: '36px 24px 100px' }}>
+      <div style={{ maxWidth: 1000, margin: '0 auto', padding: isMobile ? '20px 16px 80px' : '36px 24px 100px' }}>
 
         {/* GROUP STAGE */}
         {roundTab === 'group' && (
@@ -400,6 +404,7 @@ export default function MatchCenterPage({ onCountryClick, onVenueNav }: { onCoun
 function MatchCard({ match: m, expanded, onToggle, onCountryClick }: {
   match: Match; expanded: boolean; onToggle: () => void; onCountryClick?: (name: string) => void;
 }) {
+  const isMobile = useIsMobile();
   const gc = GROUP_COLORS[m.group] || '#f5c842';
   const ss = STATUS_STYLE[m.status];
   const hasScore = m.status !== 'upcoming';
@@ -411,91 +416,175 @@ function MatchCard({ match: m, expanded, onToggle, onCountryClick }: {
       borderRadius: 14, overflow: 'hidden', transition: 'all 0.2s',
     }}>
       {/* ── Collapsed row ── */}
-      <div
-        onClick={onToggle}
-        style={{ padding: '14px 20px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 14 }}
-      >
-        {/* Group badge */}
-        <div style={{
-          background: `${gc}18`, border: `1px solid ${gc}40`,
-          borderRadius: 6, padding: '2px 8px', flexShrink: 0,
-          fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: gc,
-        }}>
-          GRP {m.group}
+      {isMobile ? (
+        /* ── MOBILE layout ── */
+        <div onClick={onToggle} style={{ padding: '12px 14px', cursor: 'pointer' }}>
+          {/* Top row: group badge + status */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{
+                background: `${gc}18`, border: `1px solid ${gc}40`,
+                borderRadius: 5, padding: '2px 8px',
+                fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: gc,
+              }}>
+                GRP {m.group}
+              </div>
+              {m.matchday && (
+                <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>MD{m.matchday}</div>
+              )}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{
+                background: ss.bg, borderRadius: 5,
+                fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', color: ss.color,
+                padding: '2px 8px',
+              }}>
+                {ss.label}
+              </div>
+              <div style={{
+                fontSize: 12, color: 'var(--text-muted)',
+                transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s',
+              }}>▾</div>
+            </div>
+          </div>
+
+          {/* Teams row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {/* Home */}
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 7, minWidth: 0 }}>
+              <Flag emoji={m.home.flag} size={20} />
+              <span
+                onClick={e => { e.stopPropagation(); onCountryClick?.(m.home.name); }}
+                style={{
+                  fontSize: 13, fontWeight: 700, color: 'var(--white)',
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  cursor: onCountryClick ? 'pointer' : 'default',
+                }}
+              >{m.home.name}</span>
+            </div>
+
+            {/* Score / time */}
+            <div style={{
+              flexShrink: 0, textAlign: 'center', minWidth: 70, fontFamily: 'var(--font-display)',
+            }}>
+              {hasScore ? (
+                <span style={{ fontSize: 20, color: 'var(--white)' }}>
+                  {m.home.score ?? 0}–{m.away.score ?? 0}
+                </span>
+              ) : (
+                <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'var(--font-body)', fontWeight: 600 }}>
+                  {m.time}
+                </span>
+              )}
+            </div>
+
+            {/* Away */}
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 7, minWidth: 0, justifyContent: 'flex-end' }}>
+              <span
+                onClick={e => { e.stopPropagation(); onCountryClick?.(m.away.name); }}
+                style={{
+                  fontSize: 13, fontWeight: 700, color: 'var(--white)',
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  textAlign: 'right', cursor: onCountryClick ? 'pointer' : 'default',
+                }}
+              >{m.away.name}</span>
+              <Flag emoji={m.away.flag} size={20} />
+            </div>
+          </div>
+
+          {/* City */}
+          <div style={{ marginTop: 8, fontSize: 10, color: 'var(--text-muted)' }}>
+            📍 {m.city}
+          </div>
         </div>
-
-        {/* Matchday */}
-        {m.matchday && (
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', flexShrink: 0, minWidth: 32 }}>
-            MD{m.matchday}
-          </div>
-        )}
-
-        {/* Teams + score */}
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-          {/* Home */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, justifyContent: 'flex-end' }}>
-            <span
-              onClick={e => { e.stopPropagation(); onCountryClick?.(m.home.name); }}
-              style={{
-                fontSize: 14, fontWeight: 700, color: 'var(--white)', textAlign: 'right',
-                cursor: onCountryClick ? 'pointer' : 'default',
-                transition: 'color 0.15s',
-              }}
-              onMouseEnter={e => { if (onCountryClick) (e.currentTarget as HTMLSpanElement).style.color = '#f5c842'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLSpanElement).style.color = 'var(--white)'; }}
-            >{m.home.name}</span>
-            <Flag emoji={m.home.flag} size={22} />
-          </div>
-
-          {/* Score / vs */}
+      ) : (
+        /* ── DESKTOP layout ── */
+        <div
+          onClick={onToggle}
+          style={{ padding: '14px 20px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 14 }}
+        >
+          {/* Group badge */}
           <div style={{
-            minWidth: 60, textAlign: 'center', flexShrink: 0,
-            fontFamily: 'var(--font-display)',
+            background: `${gc}18`, border: `1px solid ${gc}40`,
+            borderRadius: 6, padding: '2px 8px', flexShrink: 0,
+            fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: gc,
           }}>
-            {hasScore ? (
-              <span style={{ fontSize: 22, color: 'var(--white)' }}>
-                {m.home.score ?? 0} – {m.away.score ?? 0}
-              </span>
-            ) : (
-              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{m.time}</span>
-            )}
+            GRP {m.group}
           </div>
 
-          {/* Away */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
-            <Flag emoji={m.away.flag} size={22} />
-            <span
-              onClick={e => { e.stopPropagation(); onCountryClick?.(m.away.name); }}
-              style={{
-                fontSize: 14, fontWeight: 700, color: 'var(--white)',
-                cursor: onCountryClick ? 'pointer' : 'default',
-                transition: 'color 0.15s',
-              }}
-              onMouseEnter={e => { if (onCountryClick) (e.currentTarget as HTMLSpanElement).style.color = '#f5c842'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLSpanElement).style.color = 'var(--white)'; }}
-            >{m.away.name}</span>
-          </div>
-        </div>
+          {/* Matchday */}
+          {m.matchday && (
+            <div style={{ fontSize: 10, color: 'var(--text-muted)', flexShrink: 0, minWidth: 32 }}>
+              MD{m.matchday}
+            </div>
+          )}
 
-        {/* Status + venue */}
-        <div style={{ flexShrink: 0, textAlign: 'right', minWidth: 120 }}>
+          {/* Teams + score */}
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+            {/* Home */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, justifyContent: 'flex-end' }}>
+              <span
+                onClick={e => { e.stopPropagation(); onCountryClick?.(m.home.name); }}
+                style={{
+                  fontSize: 14, fontWeight: 700, color: 'var(--white)', textAlign: 'right',
+                  cursor: onCountryClick ? 'pointer' : 'default',
+                  transition: 'color 0.15s',
+                }}
+                onMouseEnter={e => { if (onCountryClick) (e.currentTarget as HTMLSpanElement).style.color = '#f5c842'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLSpanElement).style.color = 'var(--white)'; }}
+              >{m.home.name}</span>
+              <Flag emoji={m.home.flag} size={22} />
+            </div>
+
+            {/* Score / vs */}
+            <div style={{
+              minWidth: 60, textAlign: 'center', flexShrink: 0,
+              fontFamily: 'var(--font-display)',
+            }}>
+              {hasScore ? (
+                <span style={{ fontSize: 22, color: 'var(--white)' }}>
+                  {m.home.score ?? 0} – {m.away.score ?? 0}
+                </span>
+              ) : (
+                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{m.time}</span>
+              )}
+            </div>
+
+            {/* Away */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
+              <Flag emoji={m.away.flag} size={22} />
+              <span
+                onClick={e => { e.stopPropagation(); onCountryClick?.(m.away.name); }}
+                style={{
+                  fontSize: 14, fontWeight: 700, color: 'var(--white)',
+                  cursor: onCountryClick ? 'pointer' : 'default',
+                  transition: 'color 0.15s',
+                }}
+                onMouseEnter={e => { if (onCountryClick) (e.currentTarget as HTMLSpanElement).style.color = '#f5c842'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLSpanElement).style.color = 'var(--white)'; }}
+              >{m.away.name}</span>
+            </div>
+          </div>
+
+          {/* Status + venue */}
+          <div style={{ flexShrink: 0, textAlign: 'right', minWidth: 120 }}>
+            <div style={{
+              display: 'inline-block', background: ss.bg, borderRadius: 5,
+              fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', color: ss.color,
+              padding: '2px 8px', marginBottom: 3,
+            }}>
+              {ss.label}
+            </div>
+            <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{m.city}</div>
+          </div>
+
+          {/* Expand chevron */}
           <div style={{
-            display: 'inline-block', background: ss.bg, borderRadius: 5,
-            fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', color: ss.color,
-            padding: '2px 8px', marginBottom: 3,
-          }}>
-            {ss.label}
-          </div>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{m.city}</div>
+            fontSize: 12, color: 'var(--text-muted)', flexShrink: 0,
+            transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s',
+          }}>▾</div>
         </div>
-
-        {/* Expand chevron */}
-        <div style={{
-          fontSize: 12, color: 'var(--text-muted)', flexShrink: 0,
-          transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s',
-        }}>▾</div>
-      </div>
+      )}
 
       {/* ── Expanded detail ── */}
       {expanded && (

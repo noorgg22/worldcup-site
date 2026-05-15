@@ -187,7 +187,7 @@ export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: 
               <p style={{ fontSize: 10, color: 'var(--text-muted)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 12 }}>
                 Kicks Off In
               </p>
-              <div style={{ display: 'flex', gap: 12 }}>
+              <div style={{ display: 'flex', gap: isMobile ? 8 : 12 }}>
                 {[
                   { val: countdown.d, label: 'Days' },
                   { val: countdown.h, label: 'Hrs' },
@@ -197,10 +197,11 @@ export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: 
                   <div key={label} style={{
                     background: 'rgba(255,255,255,0.04)',
                     border: '1px solid rgba(245,200,66,0.2)',
-                    borderRadius: 12, padding: '12px 16px', textAlign: 'center', minWidth: 64,
+                    borderRadius: 12, padding: isMobile ? '10px 12px' : '12px 16px', textAlign: 'center',
+                    minWidth: isMobile ? 72 : 64, flex: isMobile ? 1 : undefined,
                     backdropFilter: 'blur(8px)',
                   }}>
-                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 36, color: 'var(--gold)', lineHeight: 1 }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 30 : 36, color: 'var(--gold)', lineHeight: 1 }}>
                       {String(val).padStart(2, '0')}
                     </div>
                     <div style={{ fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: 4 }}>
@@ -267,26 +268,44 @@ export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: 
           borderRadius: 20, padding: isMobile ? '20px 20px' : '32px 40px', marginBottom: 20,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16,
         }}>
-          <div>
-            <div style={{ fontSize: 10, color: 'var(--text-muted)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 12 }}>Host Nations · Hover to explore venues</div>
-            <div style={{ display: 'flex', gap: 16 }}>
+          <div style={{ width: '100%' }}>
+            <div style={{ fontSize: 10, color: 'var(--text-muted)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 12 }}>
+              Host Nations · {isMobile ? 'Tap' : 'Hover'} to explore venues
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: isMobile ? 8 : 16 }}>
               <HostNationCard flag="🇺🇸" name="United States" venueKey="USA" onVenue={onVenue} />
               <HostNationCard flag="🇨🇦" name="Canada"        venueKey="Canada" onVenue={onVenue} />
               <HostNationCard flag="🇲🇽" name="Mexico"        venueKey="Mexico" onVenue={onVenue} />
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 32 }}>
-            {[
-              { val: 'Jun 11', label: 'Opening Match', sub: 'Mexico vs South Africa' },
-              { val: 'Jul 19', label: 'Final', sub: 'MetLife Stadium, NJ' },
-            ].map(d => (
-              <div key={d.label} style={{ textAlign: 'center' }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--gold)' }}>{d.val}</div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--white)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{d.label}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{d.sub}</div>
-              </div>
-            ))}
-          </div>
+          {!isMobile && (
+            <div style={{ display: 'flex', gap: 32, flexShrink: 0 }}>
+              {[
+                { val: 'Jun 11', label: 'Opening Match', sub: 'Mexico vs South Africa' },
+                { val: 'Jul 19', label: 'Final', sub: 'MetLife Stadium, NJ' },
+              ].map(d => (
+                <div key={d.label} style={{ textAlign: 'center' }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--gold)' }}>{d.val}</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--white)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{d.label}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{d.sub}</div>
+                </div>
+              ))}
+            </div>
+          )}
+          {isMobile && (
+            <div style={{ display: 'flex', gap: 20, width: '100%', justifyContent: 'space-around', paddingTop: 4 }}>
+              {[
+                { val: 'Jun 11', label: 'Opens', sub: 'Mexico vs South Africa' },
+                { val: 'Jul 19', label: 'Final', sub: 'MetLife, NJ' },
+              ].map(d => (
+                <div key={d.label} style={{ textAlign: 'center' }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--gold)' }}>{d.val}</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--white)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{d.label}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{d.sub}</div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Stats strip + confederation + road to final — all in one compact card */}
@@ -944,6 +963,7 @@ type VenueKey = 'USA' | 'Canada' | 'Mexico';
 function HostNationCard({ flag, name, venueKey, onVenue }: {
   flag: string; name: string; venueKey: VenueKey; onVenue: (v: Venue) => void;
 }) {
+  const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cities = venuesByCountry[venueKey];
@@ -956,24 +976,31 @@ function HostNationCard({ flag, name, venueKey, onVenue }: {
     closeTimer.current = setTimeout(() => setOpen(false), 180);
   }
 
+  const shortName = name === 'United States' ? 'USA' : name;
+
   return (
     <div
       style={{ position: 'relative' }}
-      onMouseEnter={handleEnter}
-      onMouseLeave={handleLeave}
+      onMouseEnter={!isMobile ? handleEnter : undefined}
+      onMouseLeave={!isMobile ? handleLeave : undefined}
+      onClick={isMobile ? () => setOpen(o => !o) : undefined}
     >
       <div style={{
-        display: 'flex', alignItems: 'center', gap: 10,
+        display: 'flex', flexDirection: isMobile ? 'column' : 'row',
+        alignItems: 'center', gap: isMobile ? 4 : 10,
         background: open ? 'rgba(245,200,66,0.08)' : 'transparent',
         border: `1px solid ${open ? 'rgba(245,200,66,0.25)' : 'transparent'}`,
-        borderRadius: 10, padding: '10px 14px', cursor: 'default',
-        transition: 'all 0.2s',
+        borderRadius: 10, padding: isMobile ? '10px 8px' : '10px 14px',
+        cursor: isMobile ? 'pointer' : 'default',
+        transition: 'all 0.2s', textAlign: isMobile ? 'center' : 'left',
       }}>
-        <span style={{ fontSize: 30 }}>{flag}</span>
+        <span style={{ fontSize: isMobile ? 24 : 30 }}>{flag}</span>
         <div>
-          <div style={{ fontWeight: 700, color: 'var(--white)', fontSize: 14, whiteSpace: 'nowrap' }}>{name}</div>
-          <div style={{ fontSize: 11, color: open ? 'var(--gold)' : 'var(--text-muted)', transition: 'color 0.2s' }}>
-            {cities.length} venues ↓
+          <div style={{ fontWeight: 700, color: 'var(--white)', fontSize: isMobile ? 12 : 14, whiteSpace: 'nowrap' }}>
+            {isMobile ? shortName : name}
+          </div>
+          <div style={{ fontSize: 10, color: open ? 'var(--gold)' : 'var(--text-muted)', transition: 'color 0.2s' }}>
+            {cities.length} {isMobile ? 'venues' : 'venues ↓'}
           </div>
         </div>
       </div>
