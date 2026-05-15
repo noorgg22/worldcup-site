@@ -6,6 +6,7 @@ import {
   type HistoryMoment,
 } from '../data/wcHistory';
 import MomentModal from '../components/MomentModal';
+import PageFooter from '../components/PageFooter';
 
 type FilterCategory = HistoryMoment['category'] | 'all';
 
@@ -123,6 +124,7 @@ export default function HistoryPage() {
       {selected && (
         <MomentModal moment={selected} onClose={() => setSelected(null)} />
       )}
+      <PageFooter />
     </div>
   );
 }

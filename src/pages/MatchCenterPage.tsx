@@ -3,6 +3,8 @@ import { ALL_MATCHES, KNOCKOUT_ROUNDS } from '../data/matches';
 import type { Match, MatchStatsFull } from '../data/matches';
 import { GROUP_COLORS } from '../data/wcStats';
 import VenueGlobe from '../components/VenueGlobe';
+import Flag from '../components/Flag';
+import PageFooter from '../components/PageFooter';
 import type { Venue as VenueData } from '../data/venues';
 import { venues as ALL_VENUES } from '../data/venues';
 
@@ -463,6 +465,7 @@ export default function MatchCenterPage({ onCountryClick, onVenueNav }: { onCoun
         )}
 
       </div>
+      <PageFooter />
     </div>
   );
 }
@@ -517,7 +520,7 @@ function MatchCard({ match: m, expanded, onToggle, onCountryClick }: {
               onMouseEnter={e => { if (onCountryClick) (e.currentTarget as HTMLSpanElement).style.color = '#f5c842'; }}
               onMouseLeave={e => { (e.currentTarget as HTMLSpanElement).style.color = 'var(--white)'; }}
             >{m.home.name}</span>
-            <span style={{ fontSize: 20, flexShrink: 0 }}>{m.home.flag}</span>
+            <Flag emoji={m.home.flag} size={22} />
           </div>
 
           {/* Score / vs */}
@@ -536,7 +539,7 @@ function MatchCard({ match: m, expanded, onToggle, onCountryClick }: {
 
           {/* Away */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
-            <span style={{ fontSize: 20, flexShrink: 0 }}>{m.away.flag}</span>
+            <Flag emoji={m.away.flag} size={22} />
             <span
               onClick={e => { e.stopPropagation(); onCountryClick?.(m.away.name); }}
               style={{
@@ -718,7 +721,7 @@ function UpcomingPanel({ match: m, gc }: { match: Match; gc: string }) {
 
           {/* Home team */}
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: 56, lineHeight: 1, marginBottom: 10 }}>{m.home.flag}</div>
+            <div style={{ lineHeight: 1, marginBottom: 10, display: 'flex', justifyContent: 'flex-end' }}><Flag emoji={m.home.flag} size={56} style={{ borderRadius: 6 }} /></div>
             <div style={{
               fontFamily: 'var(--font-display)', fontSize: 18, color: '#fff',
               letterSpacing: '0.04em', lineHeight: 1.1,
@@ -757,7 +760,7 @@ function UpcomingPanel({ match: m, gc }: { match: Match; gc: string }) {
 
           {/* Away team */}
           <div style={{ textAlign: 'left' }}>
-            <div style={{ fontSize: 56, lineHeight: 1, marginBottom: 10 }}>{m.away.flag}</div>
+            <div style={{ lineHeight: 1, marginBottom: 10 }}><Flag emoji={m.away.flag} size={56} style={{ borderRadius: 6 }} /></div>
             <div style={{
               fontFamily: 'var(--font-display)', fontSize: 18, color: '#fff',
               letterSpacing: '0.04em', lineHeight: 1.1,
@@ -795,9 +798,9 @@ function MatchStatsView({ stats, homeFlag, awayFlag, color }: {
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <span style={{ fontSize: 22 }}>{homeFlag}</span>
+        <Flag emoji={homeFlag} size={24} />
         <span style={{ fontSize: 10, color: 'var(--text-muted)', letterSpacing: '0.1em' }}>STAT</span>
-        <span style={{ fontSize: 22 }}>{awayFlag}</span>
+        <Flag emoji={awayFlag} size={24} />
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

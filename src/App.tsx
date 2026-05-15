@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import './index.css';
 import HomePage from './pages/HomePage';
 import GroupsPage from './pages/GroupsPage';
@@ -35,6 +36,7 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+      <Analytics />
       {page !== 'venue' && <Nav current={page} onNav={navTo} />}
       {page === 'home'    && <HomePage    onNav={navTo} onVenue={navToVenue} onHistory={() => navTo('history')} onCountryClick={openCountry} />}
       {page === 'groups'  && <GroupsPage  onCountryClick={openCountry} />}

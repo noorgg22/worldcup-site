@@ -1,5 +1,6 @@
 import { mockStandings } from '../mock/standings';
 import type { StandingsRow } from '../types';
+import PageFooter from '../components/PageFooter';
 
 const GROUPS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
 
@@ -47,6 +48,7 @@ export default function GroupsPage({ onCountryClick }: { onCountryClick?: (name:
           </div>
         ))}
       </div>
+      <PageFooter />
     </div>
   );
 }

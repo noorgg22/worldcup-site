@@ -4,6 +4,8 @@ import type { Venue } from '../data/venues';
 import { getTodayOrNearestMoments, CATEGORY_COLORS, CATEGORY_LABELS } from '../data/wcHistory';
 import type { HistoryMoment } from '../data/wcHistory';
 import MomentModal from '../components/MomentModal';
+import Flag from '../components/Flag';
+import PageFooter from '../components/PageFooter';
 
 const WorldGlobe = lazy(() => import('../components/WorldGlobe'));
 
@@ -471,7 +473,7 @@ export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: 
                 {/* Teams */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
                   <div style={{ textAlign: 'center', flex: 1 }}>
-                    <div style={{ fontSize: 42, lineHeight: 1, marginBottom: 6 }}>{m.home.flag}</div>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}><Flag emoji={m.home.flag} size={42} style={{ borderRadius: 4 }} /></div>
                     <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--white)' }}>{m.home.name}</div>
                   </div>
                   <div style={{
@@ -479,7 +481,7 @@ export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: 
                     padding: '0 12px',
                   }}>VS</div>
                   <div style={{ textAlign: 'center', flex: 1 }}>
-                    <div style={{ fontSize: 42, lineHeight: 1, marginBottom: 6 }}>{m.away.flag}</div>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}><Flag emoji={m.away.flag} size={42} style={{ borderRadius: 4 }} /></div>
                     <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--white)' }}>{m.away.name}</div>
                   </div>
                 </div>
@@ -499,7 +501,7 @@ export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: 
           })}
         </div>
       </section>
-
+      <PageFooter />
     </div>
   );
 }
@@ -719,14 +721,14 @@ function FixtureCard({ fixture: f, groupColor: gc }: { fixture: Fixture; groupCo
 
         {/* Teams */}
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
-          <span style={{ fontSize: 20 }}>{f.home.flag}</span>
+          <Flag emoji={f.home.flag} size={20} />
           <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--white)', textAlign: 'right', flex: 1 }}>{f.home.name}</span>
           <span style={{
             fontFamily: 'var(--font-display)', fontSize: 12, color: 'var(--text-muted)',
             background: 'rgba(255,255,255,0.05)', borderRadius: 4, padding: '2px 8px',
           }}>VS</span>
           <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--white)', flex: 1 }}>{f.away.name}</span>
-          <span style={{ fontSize: 20 }}>{f.away.flag}</span>
+          <Flag emoji={f.away.flag} size={20} />
         </div>
 
         {/* Divider */}
@@ -831,7 +833,7 @@ function FixtureCard({ fixture: f, groupColor: gc }: { fixture: Fixture; groupCo
               }}>
                 {/* Home */}
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 58, lineHeight: 1, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.8))' }}>{f.home.flag}</div>
+                  <div style={{ lineHeight: 1, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.8))' }}><Flag emoji={f.home.flag} size={58} style={{ borderRadius: 6 }} /></div>
                   <div style={{
                     fontSize: 14, fontWeight: 800, color: '#fff',
                     textShadow: '0 2px 8px rgba(0,0,0,0.9)', marginTop: 6,
@@ -849,7 +851,7 @@ function FixtureCard({ fixture: f, groupColor: gc }: { fixture: Fixture; groupCo
 
                 {/* Away */}
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 58, lineHeight: 1, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.8))' }}>{f.away.flag}</div>
+                  <div style={{ lineHeight: 1, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.8))' }}><Flag emoji={f.away.flag} size={58} style={{ borderRadius: 6 }} /></div>
                   <div style={{
                     fontSize: 14, fontWeight: 800, color: '#fff',
                     textShadow: '0 2px 8px rgba(0,0,0,0.9)', marginTop: 6,

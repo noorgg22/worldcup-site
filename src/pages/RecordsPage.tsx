@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import PageFooter from '../components/PageFooter';
 import { createPortal } from 'react-dom';
 import {
   INDIVIDUAL_RECORDS,
@@ -62,6 +63,7 @@ export default function RecordsPage({ onCountryClick }: { onCountryClick?: (name
         {tab === 'tournament'  && <TournamentTab />}
         {tab === 'standings'   && <StandingsTab onCountryClick={onCountryClick} />}
       </div>
+      <PageFooter />
     </div>
   );
 }
