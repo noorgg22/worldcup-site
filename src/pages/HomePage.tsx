@@ -296,14 +296,13 @@ export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: 
         <div style={{
           background: 'linear-gradient(135deg, rgba(245,200,66,0.08) 0%, rgba(255,255,255,0.03) 50%, rgba(79,195,247,0.06) 100%)',
           border: '1px solid rgba(245,200,66,0.2)',
-          borderRadius: 20, padding: isMobile ? '20px 20px' : '32px 40px', marginBottom: 20,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16,
+          borderRadius: 16, padding: isMobile ? '14px 16px' : '18px 24px', marginBottom: 20,
         }}>
           <div style={{ width: '100%' }}>
-            <div style={{ fontSize: 10, color: 'var(--text-muted)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 12 }}>
+            <div style={{ fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 10 }}>
               Host Nations · {isMobile ? 'Tap' : 'Hover'} to explore venues
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: isMobile ? 8 : 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: isMobile ? 6 : 12 }}>
               <HostNationCard flag="🇺🇸" name="United States" venueKey="USA" onVenue={onVenue} />
               <HostNationCard flag="🇨🇦" name="Canada"        venueKey="Canada" onVenue={onVenue} />
               <HostNationCard flag="🇲🇽" name="Mexico"        venueKey="Mexico" onVenue={onVenue} />
