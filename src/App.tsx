@@ -16,18 +16,25 @@ import type { Venue } from './data/venues';
 export type Page = 'home' | 'groups' | 'players' | 'venue' | 'matches' | 'predictions' | 'records' | 'history';
 
 export default function App() {
-  const [page, setPage] = useState<Page>('home');
+  const [history, setHistory] = useState<Page[]>(['home']);
   const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null);
   const [countryProfile, setCountryProfile] = useState<string | null>(null);
 
+  const page = history[history.length - 1];
+
   function navTo(p: Page) {
-    setPage(p);
+    setHistory(h => [...h, p]);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  function navBack() {
+    setHistory(h => h.length > 1 ? h.slice(0, -1) : h);
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
 
   function navToVenue(venue: Venue) {
     setSelectedVenue(venue);
-    setPage('venue');
+    setHistory(h => [...h, 'venue']);
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
 
@@ -35,10 +42,12 @@ export default function App() {
     if (name) setCountryProfile(name);
   }
 
+  const canGoBack = history.length > 1;
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <Analytics />
-      {page !== 'venue' && <Nav current={page} onNav={navTo} />}
+      {page !== 'venue' && <Nav current={page} onNav={navTo} onBack={navBack} canGoBack={canGoBack} />}
       {page === 'home'    && <HomePage    onNav={navTo} onVenue={navToVenue} onHistory={() => navTo('history')} onCountryClick={openCountry} />}
       {page === 'groups'  && <GroupsPage  onCountryClick={openCountry} />}
       {page === 'players' && <PlayersPage />}
@@ -47,7 +56,7 @@ export default function App() {
       {page === 'records'     && <RecordsPage onCountryClick={openCountry} />}
       {page === 'history'     && <HistoryPage />}
       {page === 'venue' && selectedVenue && (
-        <VenuePage venue={selectedVenue} onBack={() => navTo('home')} />
+        <VenuePage venue={selectedVenue} onBack={navBack} />
       )}
 
       {/* Global country profile modal */}
@@ -61,7 +70,10 @@ export default function App() {
   );
 }
 
-function Nav({ current, onNav }: { current: Page; onNav: (p: Page) => void }) {
+function Nav({ current, onNav, onBack, canGoBack }: {
+  current: Page; onNav: (p: Page) => void;
+  onBack: () => void; canGoBack: boolean;
+}) {
   const isMobile = useIsMobile();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -69,9 +81,9 @@ function Nav({ current, onNav }: { current: Page; onNav: (p: Page) => void }) {
     { id: 'home',        label: 'Home' },
     { id: 'matches',     label: 'Matches' },
     { id: 'groups',      label: 'Groups' },
-    { id: 'players',     label: 'Players' },
     { id: 'records',     label: 'Records' },
     { id: 'history',     label: 'History' },
+    { id: 'players',     label: 'Players' },
     { id: 'predictions', label: 'Predictions' },
   ];
 
@@ -90,7 +102,26 @@ function Nav({ current, onNav }: { current: Page; onNav: (p: Page) => void }) {
         borderBottom: '1px solid rgba(255,255,255,0.07)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: isMobile ? '0 20px' : '0 36px', height: 'var(--nav-h)',
+        overflow: 'hidden',
       }}>
+        {/* Pixel art runner */}
+        <NavRunner />
+        {/* Back button */}
+        {canGoBack && current !== 'home' && (
+          <button
+            onClick={onBack}
+            style={{
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              color: 'var(--text-muted)', fontSize: 18, padding: '6px 4px 6px 0',
+              display: 'flex', alignItems: 'center', lineHeight: 1,
+              marginRight: 4,
+            }}
+            title="Go back"
+          >
+            ←
+          </button>
+        )}
+
         {/* Logo */}
         <div
           onClick={() => handleNav('home')}
@@ -197,5 +228,105 @@ function Nav({ current, onNav }: { current: Page; onNav: (p: Page) => void }) {
         </div>
       )}
     </>
+  );
+}
+
+// ── Pixel-art Brazil #10 runner ──────────────────────────────────────────────
+const _P = 3; // one "pixel" = 3 CSS px
+
+function _r(x: number, y: number, fill: string, k: string) {
+  return <rect key={k} x={x * _P} y={y * _P} width={_P} height={_P} fill={fill} />;
+}
+
+function NavRunner() {
+  const S  = '#f5c5a3'; // skin
+  const Ha = '#1a0500'; // hair
+  const Y  = '#FFCC00'; // Brazil yellow jersey
+  const B  = '#003DA5'; // Brazil blue shorts
+  const W  = '#ffffff'; // socks / ball white
+  const K  = '#111111'; // shoes / ball dark
+  const G  = '#009C3B'; // green detail
+
+  // ── Shared body pixels (head + jersey + shorts) ──────────────────────────
+  const body: [number, number, string][] = [
+    // Head
+    [3,0,S],[4,0,S],[5,0,S],[6,0,S],
+    [2,1,S],[3,1,S],[4,1,S],[5,1,S],[6,1,S],[7,1,S],
+    [2,2,S],[3,2,Ha],[4,2,Ha],[5,2,Ha],[6,2,Ha],[7,2,S],
+    [2,3,S],[3,3,S],[4,3,S],[5,3,S],[6,3,S],[7,3,S],
+    // Jersey body
+    [1,4,Y],[2,4,Y],[3,4,Y],[4,4,Y],[5,4,Y],[6,4,Y],[7,4,Y],[8,4,Y],
+    [0,5,Y],[1,5,Y],[2,5,Y],[3,5,Y],[4,5,Y],[5,5,Y],[6,5,Y],[7,5,Y],[8,5,Y],[9,5,Y],
+    [0,6,Y],[1,6,Y],[2,6,Y],[3,6,Y],[4,6,Y],[5,6,Y],[6,6,Y],[7,6,Y],[8,6,Y],[9,6,Y],
+    [1,7,Y],[2,7,Y],[3,7,Y],[4,7,Y],[5,7,Y],[6,7,Y],[7,7,Y],[8,7,Y],
+    [2,8,Y],[3,8,Y],[4,8,Y],[5,8,Y],[6,8,Y],[7,8,Y],
+    // "#10" on jersey — green "1" + green "0"
+    [3,5,G],[3,6,G],[3,7,G],                                     // "1"
+    [5,5,G],[6,5,G],[5,6,G],[6,6,G],[5,7,G],[6,7,G],            // "0" (filled block)
+    // Green collar stripe
+    [2,4,G],[3,4,G],[4,4,G],[5,4,G],[6,4,G],[7,4,G],
+    // Shorts
+    [2,9,B],[3,9,B],[4,9,B],[5,9,B],[6,9,B],[7,9,B],
+    [2,10,B],[3,10,B],[4,10,B],[5,10,B],[6,10,B],[7,10,B],
+  ];
+
+  // ── Frame 1 — left leg forward ───────────────────────────────────────────
+  const frame1: [number, number, string][] = [
+    [2,11,B],[3,11,B],[6,11,B],[7,11,B],
+    [2,12,W],[3,12,W],[6,12,W],[7,12,W],
+    [2,13,W],[3,13,W],[6,13,W],[7,13,W],
+    [1,14,K],[2,14,K],[3,14,K],[4,14,K],[6,14,K],[7,14,K],
+    [2,15,K],[3,15,K],[6,15,K],[7,15,K],
+  ];
+
+  // ── Frame 2 — right leg forward ──────────────────────────────────────────
+  const frame2: [number, number, string][] = [
+    [1,11,B],[2,11,B],[7,11,B],[8,11,B],
+    [1,12,W],[2,12,W],[7,12,W],[8,12,W],
+    [1,13,W],[2,13,W],[7,13,W],[8,13,W],
+    [1,14,K],[2,14,K],[7,14,K],[8,14,K],[9,14,K],
+    [1,15,K],[2,15,K],[7,15,K],[8,15,K],
+  ];
+
+  // ── Soccer ball ──────────────────────────────────────────────────────────
+  const ballBase: [number, number, string][] = [
+    [11,12,W],[12,12,W],
+    [10,13,W],[11,13,K],[12,13,K],[13,13,W],
+    [10,14,W],[11,14,K],[12,14,K],[13,14,W],
+    [11,15,W],[12,15,W],
+  ];
+
+  const svgW = 14 * _P;
+  const svgH = 16 * _P;
+
+  return (
+    <div style={{
+      position: 'absolute', inset: 0,
+      overflow: 'hidden', pointerEvents: 'none', zIndex: 0,
+    }}>
+      <div style={{
+        position: 'absolute',
+        top: '50%',
+        marginTop: -(svgH / 2),
+        animation: 'playerRun 22s linear infinite',
+        willChange: 'transform',
+      }}>
+        <div style={{ animation: 'playerBounce 0.22s ease-in-out infinite' }}>
+          <svg width={svgW} height={svgH} style={{ display: 'block' }}>
+            {body.map(([x, y, c], i) => _r(x, y, c, `b${i}`))}
+            {/* Frame 1 legs */}
+            <g style={{ animation: 'legsF1 0.22s steps(1, end) infinite' }}>
+              {frame1.map(([x, y, c], i) => _r(x, y, c, `f1${i}`))}
+            </g>
+            {/* Frame 2 legs */}
+            <g style={{ animation: 'legsF2 0.22s steps(1, end) infinite' }}>
+              {frame2.map(([x, y, c], i) => _r(x, y, c, `f2${i}`))}
+            </g>
+            {/* Ball */}
+            {ballBase.map(([x, y, c], i) => _r(x, y, c, `ball${i}`))}
+          </svg>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -66,7 +66,7 @@ export default function VenuePage({ venue, onBack }: Props) {
             (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)';
           }}
         >
-          ← Back to Home
+          ← Back
         </button>
       </div>
 

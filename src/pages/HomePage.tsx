@@ -261,10 +261,14 @@ export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: 
 
       {/* ── MOBILE GLOBE — below hero text ───────────────────────── */}
       {isMobile && (
-        <div style={{
-          position: 'relative', overflow: 'hidden',
-          marginTop: -20, marginBottom: -40,
-        }}>
+        <div style={{ position: 'relative', overflow: 'hidden', marginTop: -20, marginBottom: 0 }}>
+          {/* Hint above globe */}
+          <div style={{
+            textAlign: 'center', fontSize: 10, color: 'var(--text-muted)',
+            letterSpacing: '0.14em', textTransform: 'uppercase', paddingBottom: 8,
+          }}>
+            Tap a country to view profile
+          </div>
           {/* Gold ambient glow */}
           <div style={{
             position: 'absolute', inset: 0, pointerEvents: 'none',
@@ -283,14 +287,6 @@ export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: 
             background: 'linear-gradient(to top, var(--bg) 0%, transparent 100%)',
             pointerEvents: 'none',
           }} />
-          {/* Hint text */}
-          <div style={{
-            position: 'absolute', bottom: 12, left: 0, right: 0,
-            textAlign: 'center', fontSize: 10, color: 'var(--text-muted)',
-            letterSpacing: '0.1em', textTransform: 'uppercase', pointerEvents: 'none',
-          }}>
-            Tap a country to view profile
-          </div>
         </div>
       )}
 
@@ -313,34 +309,6 @@ export default function HomePage({ onNav, onVenue, onHistory, onCountryClick }: 
               <HostNationCard flag="🇲🇽" name="Mexico"        venueKey="Mexico" onVenue={onVenue} />
             </div>
           </div>
-          {!isMobile && (
-            <div style={{ display: 'flex', gap: 32, flexShrink: 0 }}>
-              {[
-                { val: 'Jun 11', label: 'Opening Match', sub: 'Mexico vs South Africa' },
-                { val: 'Jul 19', label: 'Final', sub: 'MetLife Stadium, NJ' },
-              ].map(d => (
-                <div key={d.label} style={{ textAlign: 'center' }}>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--gold)' }}>{d.val}</div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--white)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{d.label}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{d.sub}</div>
-                </div>
-              ))}
-            </div>
-          )}
-          {isMobile && (
-            <div style={{ display: 'flex', gap: 20, width: '100%', justifyContent: 'space-around', paddingTop: 4 }}>
-              {[
-                { val: 'Jun 11', label: 'Opens', sub: 'Mexico vs South Africa' },
-                { val: 'Jul 19', label: 'Final', sub: 'MetLife, NJ' },
-              ].map(d => (
-                <div key={d.label} style={{ textAlign: 'center' }}>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--gold)' }}>{d.val}</div>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--white)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{d.label}</div>
-                  <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{d.sub}</div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Stats strip + confederation + road to final — all in one compact card */}

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { mockPlayers } from '../mock/players';
+import { useIsMobile } from '../hooks/useIsMobile';
 import type { Player, HeatmapZone } from '../types';
 
 type SortKey = 'goals' | 'assists' | 'xG' | 'minutesPlayed' | 'keyPasses';
@@ -7,6 +8,7 @@ type SortKey = 'goals' | 'assists' | 'xG' | 'minutesPlayed' | 'keyPasses';
 export default function PlayersPage() {
   const [sort, setSort] = useState<SortKey>('goals');
   const [selected, setSelected] = useState<Player | null>(null);
+  const isMobile = useIsMobile();
 
   const sorted = [...mockPlayers].sort((a, b) => {
     const av = sort === 'xG' ? a.statistics.xG : (a.statistics as any)[sort];
@@ -15,13 +17,30 @@ export default function PlayersPage() {
   });
 
   return (
-    <div style={{ paddingTop: 64, maxWidth: 1100, margin: '0 auto', padding: '80px 24px' }}>
-      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 48, color: 'var(--white)', marginBottom: 8 }}>
+    <div style={{ paddingTop: 64, maxWidth: 1100, margin: '0 auto', padding: isMobile ? '72px 16px 60px' : '80px 24px' }}>
+      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 36 : 48, color: 'var(--white)', marginBottom: 8 }}>
         PLAYER STATS
       </h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: 32, fontSize: 13 }}>
-        Mock tournament data · Click any player to view their pitch heatmap
+      <p style={{ color: 'var(--text-muted)', marginBottom: 16, fontSize: 13 }}>
+        Projected tournament stats · Click any player to view their pitch heatmap
       </p>
+
+      {/* Projected stats notice */}
+      <div style={{
+        display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 28,
+        background: 'rgba(245,200,66,0.07)', border: '1px solid rgba(245,200,66,0.25)',
+        borderRadius: 12, padding: '13px 16px',
+      }}>
+        <span style={{ fontSize: 16, flexShrink: 0, marginTop: 1 }}>📊</span>
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--gold)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 3 }}>
+            Projected Stats
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+            These are projected tournament stats based on current form. Live stats will update automatically once the 2026 World Cup begins on <span style={{ color: 'var(--text)' }}>June 11, 2026</span>.
+          </div>
+        </div>
+      </div>
 
       {/* Sort tabs */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 28, flexWrap: 'wrap' }}>
@@ -31,14 +50,18 @@ export default function PlayersPage() {
             border: sort === k ? '1px solid rgba(245,200,66,0.4)' : '1px solid var(--border)',
             color: sort === k ? 'var(--gold)' : 'var(--text-muted)',
             fontWeight: 600, fontSize: 12, letterSpacing: '0.06em', textTransform: 'uppercase',
-            padding: '7px 16px', borderRadius: 8, cursor: 'pointer', transition: 'all 0.2s',
+            padding: '7px 14px', borderRadius: 8, cursor: 'pointer', transition: 'all 0.2s',
           }}>
             {k === 'xG' ? 'xG' : k === 'keyPasses' ? 'Key Passes' : k === 'minutesPlayed' ? 'Minutes' : k.charAt(0).toUpperCase() + k.slice(1)}
           </button>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 380px' : '1fr', gap: 24, alignItems: 'start' }}>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: selected && !isMobile ? '1fr 380px' : '1fr',
+        gap: 24, alignItems: 'start',
+      }}>
         {/* Player list */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {sorted.map((p, i) => {
@@ -48,32 +71,32 @@ export default function PlayersPage() {
                 key={p.id}
                 onClick={() => setSelected(isSelected ? null : p)}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 16,
+                  display: 'flex', alignItems: 'center', gap: isMobile ? 10 : 16,
                   background: isSelected ? 'rgba(245,200,66,0.06)' : 'var(--bg-card)',
                   border: isSelected ? '1px solid rgba(245,200,66,0.35)' : '1px solid var(--border)',
-                  borderRadius: 12, padding: '14px 20px', cursor: 'pointer',
+                  borderRadius: 12, padding: isMobile ? '12px 14px' : '14px 20px', cursor: 'pointer',
                   transition: 'all 0.2s',
                   borderLeft: i === 0 ? '3px solid var(--gold)' : undefined,
                 }}
               >
                 <span style={{
-                  fontFamily: 'var(--font-display)', fontSize: 22, minWidth: 28,
+                  fontFamily: 'var(--font-display)', fontSize: isMobile ? 16 : 22, minWidth: isMobile ? 20 : 28,
                   color: i === 0 ? 'var(--gold)' : 'var(--text-muted)',
                 }}>{i + 1}</span>
-                <span style={{ fontSize: 24 }}>{p.team.flag}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700, color: 'var(--white)', fontSize: 15 }}>{p.name}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                    {p.position} · {p.club} · {p.team.name}
+                <span style={{ fontSize: isMobile ? 20 : 24 }}>{p.team.flag}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, color: 'var(--white)', fontSize: isMobile ? 13 : 15, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {p.position} · {isMobile ? p.team.name : `${p.club} · ${p.team.name}`}
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 20 }}>
+                <div style={{ display: 'flex', gap: isMobile ? 10 : 20, flexShrink: 0 }}>
                   <MiniStat label="G" value={p.statistics.goals} gold />
                   <MiniStat label="A" value={p.statistics.assists} />
-                  <MiniStat label="xG" value={p.statistics.xG.toFixed(1)} />
-                  <MiniStat label="MIN" value={p.statistics.minutesPlayed} />
+                  {!isMobile && <MiniStat label="xG" value={p.statistics.xG.toFixed(1)} />}
+                  {!isMobile && <MiniStat label="MIN" value={p.statistics.minutesPlayed} />}
                 </div>
-                <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>🗺️ Heatmap</span>
+                {!isMobile && <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>🗺️ Heatmap</span>}
               </div>
             );
           })}
@@ -83,11 +106,13 @@ export default function PlayersPage() {
         {selected && (
           <div style={{
             background: 'var(--bg-card)', border: '1px solid rgba(245,200,66,0.2)',
-            borderRadius: 16, padding: 24, position: 'sticky', top: 80,
+            borderRadius: 16, padding: isMobile ? 16 : 24,
+            position: isMobile ? 'relative' : 'sticky', top: isMobile ? 'auto' : 80,
+            marginTop: isMobile ? 8 : 0,
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--white)' }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 18 : 22, color: 'var(--white)' }}>
                   {selected.team.flag} {selected.name}
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{selected.position} · {selected.club}</div>
@@ -98,7 +123,7 @@ export default function PlayersPage() {
               }}>×</button>
             </div>
 
-            <Heatmap zones={selected.heatmap} />
+            <Heatmap zones={selected.heatmap} isMobile={isMobile} />
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 16 }}>
               {[
@@ -134,8 +159,9 @@ function MiniStat({ label, value, gold }: { label: string; value: any; gold?: bo
   );
 }
 
-function Heatmap({ zones }: { zones: HeatmapZone[] }) {
-  const W = 320, H = 210;
+function Heatmap({ zones, isMobile }: { zones: HeatmapZone[]; isMobile?: boolean }) {
+  const W = isMobile ? 280 : 320;
+  const H = isMobile ? 185 : 210;
   return (
     <div style={{ position: 'relative', width: W, height: H, margin: '0 auto', borderRadius: 8, overflow: 'hidden' }}>
       {/* Pitch */}
