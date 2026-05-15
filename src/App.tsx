@@ -234,7 +234,7 @@ function Nav({ current, onNav, onBack, canGoBack }: {
 // ── Smooth SVG soccer players (Brazil → Argentina pass) ──────────────────────
 
 /** Shared running frame groups for legs + arms */
-function RunFrames({ jerseyColor, shortsColor }: { jerseyColor: string; shortsColor: string }) {
+function RunFrames({ jerseyColor }: { jerseyColor: string }) {
   return (
     <>
       {/* Frame 1: left leg/arm forward */}
@@ -293,7 +293,7 @@ function BrazilPlayer() {
       {/* Shorts */}
       <rect x="9" y="35" width="20" height="8" rx="3" fill="#003DA5"/>
       {/* Running frames */}
-      <RunFrames jerseyColor="#FFCC00" shortsColor="#003DA5"/>
+      <RunFrames jerseyColor="#FFCC00"/>
     </svg>
   );
 }
