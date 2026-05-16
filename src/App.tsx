@@ -331,53 +331,50 @@ function NavRunner() {
   return (
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
 
-      {/* ── Brazil #10 ── */}
+      {/* ── Brazil #10 — stationary, faces right ── */}
       <div style={{
         position: 'absolute', top: '50%', marginTop: -(svgH / 2),
-        animation: 'playerRun 28s linear infinite',
-        willChange: 'transform',
+        left: '38%',
       }}>
-        <div style={{ animation: 'playerBounce 0.25s ease-in-out infinite' }}>
+        <div style={{ animation: 'playerBounce 0.6s ease-in-out infinite' }}>
           <svg width={svgW} height={svgH} style={{ display: 'block' }}>
             {[...head, ...brJ].map(([x,y,c],i) => _r(x,y,c,`br${i}`))}
-            <g style={{ animation: 'legsF1 0.25s steps(1,end) infinite' }}>
+            <g style={{ animation: 'legsF1 0.4s steps(1,end) infinite' }}>
               {f1.map(([x,y,c],i) => _r(x,y,c,`brf1${i}`))}
             </g>
-            <g style={{ animation: 'legsF2 0.25s steps(1,end) infinite' }}>
+            <g style={{ animation: 'legsF2 0.4s steps(1,end) infinite' }}>
               {f2.map(([x,y,c],i) => _r(x,y,c,`brf2${i}`))}
             </g>
           </svg>
         </div>
       </div>
 
-      {/* ── Argentina #10 — 5s ahead so Brazil can pass to them ── */}
+      {/* ── Argentina #10 — stationary, faces left (mirrored) ── */}
       <div style={{
         position: 'absolute', top: '50%', marginTop: -(svgH / 2),
-        animation: 'playerRun 28s linear infinite',
-        animationDelay: '-5s',
-        willChange: 'transform',
+        left: '55%',
+        transform: 'scaleX(-1)',
       }}>
-        <div style={{ animation: 'playerBounce 0.25s ease-in-out infinite', animationDelay: '0.125s' }}>
+        <div style={{ animation: 'playerBounce 0.6s ease-in-out infinite', animationDelay: '0.3s' }}>
           <svg width={svgW} height={svgH} style={{ display: 'block' }}>
             {[...head, ...arJ].map(([x,y,c],i) => _r(x,y,c,`ar${i}`))}
-            {/* Offset frames so they don't step in sync */}
-            <g style={{ animation: 'legsF2 0.25s steps(1,end) infinite' }}>
+            <g style={{ animation: 'legsF2 0.4s steps(1,end) infinite' }}>
               {f1.map(([x,y,c],i) => _r(x,y,c,`arf1${i}`))}
             </g>
-            <g style={{ animation: 'legsF1 0.25s steps(1,end) infinite' }}>
+            <g style={{ animation: 'legsF1 0.4s steps(1,end) infinite' }}>
               {f2.map(([x,y,c],i) => _r(x,y,c,`arf2${i}`))}
             </g>
           </svg>
         </div>
       </div>
 
-      {/* ── Ball — Brazil kicks past logo, Argentina passes back ── */}
+      {/* ── Ball — bounces back and forth between the two ── */}
       <div style={{
         position: 'absolute',
         top: '50%',
-        marginTop: svgH / 2 - ballSz,
-        animation: 'ballPass 28s linear infinite',
-        willChange: 'transform',
+        marginTop: svgH / 2 - ballSz - 2,
+        left: 'calc(38% + 12px)',
+        animation: 'ballBounce 1.8s ease-in-out infinite',
       }}>
         <svg width={ballSz} height={ballSz} style={{ display: 'block' }}>
           {ball.map(([x,y,c],i) => _r(x,y,c,`ball${i}`))}
