@@ -374,7 +374,7 @@ function NavRunner() {
         top: '50%',
         marginTop: svgH / 2 - ballSz - 2,
         left: 'calc(16% + 12px)',
-        animation: 'ballBounce 3s ease-in-out infinite',
+        animation: 'ballBounce 8s linear infinite',
       }}>
         <svg width={ballSz} height={ballSz} style={{ display: 'block' }}>
           {ball.map(([x,y,c],i) => _r(x,y,c,`ball${i}`))}

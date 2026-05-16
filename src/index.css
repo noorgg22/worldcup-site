@@ -297,11 +297,13 @@ h1, h2, h3, h4 {
   0%, 49.9% { opacity: 0; }
   50%, 100%  { opacity: 1; }
 }
-/* Ball rolls on the ground between Brazil (16%) and Argentina (55%) */
+/* Ball passes with arc between Brazil (16%) and Argentina (55%) */
 @keyframes ballBounce {
-  0%   { transform: translateX(0); }
-  50%  { transform: translateX(39vw); }
-  100% { transform: translateX(0); }
+  0%   { transform: translateX(0)      translateY(0);     animation-timing-function: ease-out; }
+  25%  { transform: translateX(19.5vw) translateY(-14px); }
+  50%  { transform: translateX(39vw)   translateY(0);     animation-timing-function: ease-out; }
+  75%  { transform: translateX(19.5vw) translateY(-14px); }
+  100% { transform: translateX(0)      translateY(0); }
 }
 
 /* ── Mobile responsive overrides ───────────────────────────────────────────── */
