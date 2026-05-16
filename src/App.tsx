@@ -334,7 +334,7 @@ function NavRunner() {
       {/* ── Brazil #10 — stationary, faces right ── */}
       <div style={{
         position: 'absolute', top: '50%', marginTop: -(svgH / 2),
-        left: '38%',
+        left: '230px',
       }}>
         <div style={{ animation: 'playerBounce 0.6s ease-in-out infinite' }}>
           <svg width={svgW} height={svgH} style={{ display: 'block' }}>
@@ -373,8 +373,8 @@ function NavRunner() {
         position: 'absolute',
         top: '50%',
         marginTop: svgH / 2 - ballSz - 2,
-        left: 'calc(38% + 12px)',
-        animation: 'ballBounce 1.8s ease-in-out infinite',
+        left: '242px',
+        animation: 'ballBounce 3s ease-in-out infinite',
       }}>
         <svg width={ballSz} height={ballSz} style={{ display: 'block' }}>
           {ball.map(([x,y,c],i) => _r(x,y,c,`ball${i}`))}
