@@ -86,15 +86,15 @@ export default function RegionGlobe({ activeRegion, onCountryClick, size = 480 }
     if (!region) return 'rgba(255,255,255,0.02)';
     const col = REGION_COLOR[region];
     const r = parseInt(col.slice(1,3),16), g = parseInt(col.slice(3,5),16), b = parseInt(col.slice(5,7),16);
-    if (feat === hovered) return `rgba(${r},${g},${b},0.9)`;
-    if (region === activeRegion) return `rgba(${r},${g},${b},0.45)`;
-    return `rgba(${r},${g},${b},0.10)`;
+    if (feat === hovered) return `rgba(${r},${g},${b},0.95)`;
+    if (region === activeRegion) return `rgba(${r},${g},${b},0.65)`;
+    return `rgba(${r},${g},${b},0.28)`;  // all WC nations always visible
   }, [activeRegion, hovered, getRegion]);
 
   const sideColor = useCallback((feat: any) => {
     const region = getRegion(feat);
-    if (!region || region !== activeRegion) return 'rgba(0,0,0,0)';
-    return `${REGION_COLOR[region]}55`;
+    if (!region) return 'rgba(0,0,0,0)';
+    return region === activeRegion ? `${REGION_COLOR[region]}66` : `${REGION_COLOR[region]}22`;
   }, [activeRegion, getRegion]);
 
   const strokeColor = useCallback((feat: any) => {

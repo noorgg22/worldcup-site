@@ -8,14 +8,13 @@ import RosterPage from './pages/RosterPage';
 import TeamProfilePage from './pages/TeamProfilePage';
 import VenuePage from './pages/VenuePage';
 import MatchCenterPage from './pages/MatchCenterPage';
-import PredictionsPage from './pages/PredictionsPage';
 import RecordsPage from './pages/RecordsPage';
 import HistoryPage from './pages/HistoryPage';
 import CountryProfileModal from './components/CountryProfileModal';
 import type { Venue } from './data/venues';
 import type { TeamRoster } from './data/rosters';
 
-export type Page = 'home' | 'groups' | 'roster' | 'teamprofile' | 'venue' | 'matches' | 'predictions' | 'records' | 'history';
+export type Page = 'home' | 'groups' | 'roster' | 'teamprofile' | 'venue' | 'matches' | 'records' | 'history';
 
 export default function App() {
   const [history, setHistory] = useState<Page[]>(['home']);
@@ -56,7 +55,6 @@ export default function App() {
       {page === 'roster'  && <RosterPage onTeamSelect={team => { setSelectedTeam(team); setHistory(h => [...h, 'teamprofile']); window.scrollTo({top:0,behavior:'instant'}); }} />}
       {page === 'teamprofile' && selectedTeam && <TeamProfilePage team={selectedTeam} onBack={navBack} />}
       {page === 'matches'     && <MatchCenterPage onCountryClick={openCountry} onVenueNav={navToVenue} />}
-      {page === 'predictions' && <PredictionsPage />}
       {page === 'records'     && <RecordsPage onCountryClick={openCountry} />}
       {page === 'history'     && <HistoryPage />}
       {page === 'venue' && selectedVenue && (
@@ -88,7 +86,6 @@ function Nav({ current, onNav, onBack, canGoBack }: {
     { id: 'records',     label: 'Records' },
     { id: 'history',     label: 'History' },
     { id: 'roster',      label: 'Roster' },
-    { id: 'predictions', label: 'Predictions' },
   ];
 
   function handleNav(p: Page) {

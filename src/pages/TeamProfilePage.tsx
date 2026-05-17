@@ -5,15 +5,21 @@ import { useIsMobile } from '../hooks/useIsMobile';
 interface Props { team: TeamRoster; onBack: () => void; }
 
 async function fetchWikiPhoto(name: string): Promise<string | null> {
-  try {
-    const res = await fetch(
-      `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(name)}&prop=pageimages&format=json&pithumbsize=400&origin=*`
-    );
-    const json = await res.json();
-    const pages = json?.query?.pages ?? {};
-    const page: any = Object.values(pages)[0];
-    return page?.thumbnail?.source ?? null;
-  } catch { return null; }
+  const tryTitle = async (title: string): Promise<string | null> => {
+    try {
+      const res = await fetch(
+        `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=pageimages&format=json&pithumbsize=400&origin=*`
+      );
+      const json = await res.json();
+      const pages = json?.query?.pages ?? {};
+      const page: any = Object.values(pages)[0];
+      // Reject if it's a disambiguation, missing, or the thumbnail looks like an object/flag
+      if (page?.missing !== undefined) return null;
+      return page?.thumbnail?.source ?? null;
+    } catch { return null; }
+  };
+  // Try exact name, then "name footballer" fallback
+  return (await tryTitle(name)) ?? (await tryTitle(name + ' footballer'));
 }
 
 const POS_COLOR: Record<Position, string> = {
