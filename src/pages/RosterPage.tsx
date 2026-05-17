@@ -16,6 +16,18 @@ const CONF_COLOR: Record<string, string> = {
 
 const REGIONS: Region[] = ['europe','south-america','north-america','africa','asia','oceania'];
 
+// GeoJSON feature names → roster country names
+const GEO_TO_ROSTER: Record<string, string> = {
+  'United States of America': 'United States',
+  'Democratic Republic of the Congo': 'DR Congo',
+  'Turkey': 'Türkiye',
+  'Bosnia and Herzegovina': 'Bosnia & Herzegovina',
+  'Cape Verde': 'Cabo Verde',
+  "Ivory Coast": "Côte d'Ivoire",
+  'South Korea': 'Korea Republic',
+  'Republic of Korea': 'Korea Republic',
+};
+
 interface Props { onTeamSelect: (team: TeamRoster) => void; }
 
 function TeamCard({ team, onClick }: { team: TeamRoster; onClick: () => void }) {
@@ -141,9 +153,14 @@ export default function RosterPage({ onTeamSelect }: Props) {
               <RegionGlobe
                 activeRegion={activeRegion}
                 size={isMobile ? Math.min(window.innerWidth - 64, 400) : 480}
+                onCountryClick={geoName => {
+                  const rosterName = GEO_TO_ROSTER[geoName] ?? geoName;
+                  const team = ROSTERS.find(r => r.country === rosterName);
+                  if (team) onTeamSelect(team);
+                }}
               />
               <p style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-dim)', padding: '4px 0 10px', margin: 0 }}>
-                Drag to rotate · Click a team card to view their roster
+                Drag to rotate · Click a nation on the globe to view their roster
               </p>
             </div>
           </div>
