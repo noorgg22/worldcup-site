@@ -103,16 +103,16 @@ export default function RosterPage({ onTeamSelect }: Props) {
 
       {/* Region tabs */}
       <div style={{
-        display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 8,
-        padding: '24px 24px 0', maxWidth: 900, margin: '0 auto',
+        display: 'flex', justifyContent: 'center', flexWrap: 'nowrap', gap: 6,
+        padding: '24px 16px 0', maxWidth: 1100, margin: '0 auto', overflowX: 'auto',
       }}>
         {REGIONS.map(region => {
           const active = activeRegion === region;
           const count  = getRegionTeams(region).length;
           return (
             <button key={region} onClick={() => setActiveRegion(region)} style={{
-              display: 'flex', alignItems: 'center', gap: 7,
-              padding: '10px 20px', borderRadius: 100,
+              display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0,
+              padding: '9px 14px', borderRadius: 100,
               background: active ? 'rgba(245,200,66,0.1)' : 'transparent',
               border: `1px solid ${active ? 'rgba(245,200,66,0.35)' : 'var(--border)'}`,
               color: active ? 'var(--gold)' : 'var(--text-muted)',
