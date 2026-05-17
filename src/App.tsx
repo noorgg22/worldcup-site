@@ -4,7 +4,8 @@ import { useIsMobile } from './hooks/useIsMobile';
 import './index.css';
 import HomePage from './pages/HomePage';
 import GroupsPage from './pages/GroupsPage';
-import PlayersPage from './pages/PlayersPage';
+import RosterPage from './pages/RosterPage';
+import TeamProfilePage from './pages/TeamProfilePage';
 import VenuePage from './pages/VenuePage';
 import MatchCenterPage from './pages/MatchCenterPage';
 import PredictionsPage from './pages/PredictionsPage';
@@ -12,12 +13,14 @@ import RecordsPage from './pages/RecordsPage';
 import HistoryPage from './pages/HistoryPage';
 import CountryProfileModal from './components/CountryProfileModal';
 import type { Venue } from './data/venues';
+import type { TeamRoster } from './data/rosters';
 
-export type Page = 'home' | 'groups' | 'players' | 'venue' | 'matches' | 'predictions' | 'records' | 'history';
+export type Page = 'home' | 'groups' | 'roster' | 'teamprofile' | 'venue' | 'matches' | 'predictions' | 'records' | 'history';
 
 export default function App() {
   const [history, setHistory] = useState<Page[]>(['home']);
   const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null);
+  const [selectedTeam, setSelectedTeam]   = useState<TeamRoster | null>(null);
   const [countryProfile, setCountryProfile] = useState<string | null>(null);
 
   const page = history[history.length - 1];
@@ -47,10 +50,11 @@ export default function App() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <Analytics />
-      {page !== 'venue' && <Nav current={page} onNav={navTo} onBack={navBack} canGoBack={canGoBack} />}
+      {page !== 'venue' && page !== 'teamprofile' && <Nav current={page} onNav={navTo} onBack={navBack} canGoBack={canGoBack} />}
       {page === 'home'    && <HomePage    onNav={navTo} onVenue={navToVenue} onHistory={() => navTo('history')} onCountryClick={openCountry} />}
       {page === 'groups'  && <GroupsPage  onCountryClick={openCountry} />}
-      {page === 'players' && <PlayersPage />}
+      {page === 'roster'  && <RosterPage onTeamSelect={team => { setSelectedTeam(team); setHistory(h => [...h, 'teamprofile']); window.scrollTo({top:0,behavior:'instant'}); }} />}
+      {page === 'teamprofile' && selectedTeam && <TeamProfilePage team={selectedTeam} onBack={navBack} />}
       {page === 'matches'     && <MatchCenterPage onCountryClick={openCountry} onVenueNav={navToVenue} />}
       {page === 'predictions' && <PredictionsPage />}
       {page === 'records'     && <RecordsPage onCountryClick={openCountry} />}
@@ -83,7 +87,7 @@ function Nav({ current, onNav, onBack, canGoBack }: {
     { id: 'groups',      label: 'Groups' },
     { id: 'records',     label: 'Records' },
     { id: 'history',     label: 'History' },
-    { id: 'players',     label: 'Players' },
+    { id: 'roster',      label: 'Roster' },
     { id: 'predictions', label: 'Predictions' },
   ];
 
