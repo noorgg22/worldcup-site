@@ -12,21 +12,32 @@ const REGION_POV: Record<Region, { lat: number; lng: number; altitude: number }>
 };
 
 const COUNTRY_REGIONS: Record<string, Region> = {
+  // Europe
   'Spain':'europe','France':'europe','England':'europe','Germany':'europe','Portugal':'europe',
   'Netherlands':'europe','Belgium':'europe','Switzerland':'europe','Croatia':'europe','Denmark':'europe',
-  'Austria':'europe','Scotland':'europe','Serbia':'europe','Turkey':'europe','Poland':'europe',
-  'Hungary':'europe','Sweden':'europe','Norway':'europe','Czechia':'europe',
+  'Austria':'europe','Scotland':'europe','Turkey':'europe','Poland':'europe',
+  'Hungary':'europe','Sweden':'europe','Norway':'europe',
+  'Czech Republic':'europe','Czechia':'europe',
   'Bosnia and Herzegovina':'europe','Bosnia & Herzegovina':'europe',
+  'Republic of Serbia':'europe','Serbia':'europe',
+  // South America
   'Argentina':'south-america','Brazil':'south-america','Uruguay':'south-america',
   'Colombia':'south-america','Ecuador':'south-america','Venezuela':'south-america','Paraguay':'south-america',
-  'United States of America':'north-america','United States':'north-america','Canada':'north-america',
-  'Mexico':'north-america','Panama':'north-america','Honduras':'north-america','Jamaica':'north-america',
-  'Haiti':'north-america',"Curaçao":'north-america',
+  // North & Central America
+  'USA':'north-america','United States of America':'north-america','United States':'north-america',
+  'Canada':'north-america','Mexico':'north-america','Panama':'north-america',
+  'Honduras':'north-america','Jamaica':'north-america','Haiti':'north-america',"Curaçao":'north-america',
+  // Africa
   'Morocco':'africa','Senegal':'africa','Egypt':'africa','Nigeria':'africa','Ghana':'africa',
-  'Cameroon':'africa','South Africa':'africa','Tunisia':'africa','Democratic Republic of the Congo':'africa',
-  'DR Congo':'africa',"Côte d'Ivoire":'africa','Algeria':'africa','Cape Verde':'africa','Cabo Verde':'africa',
-  'Japan':'asia','Korea Republic':'asia','Australia':'asia','Iran':'asia','Saudi Arabia':'asia',
+  'Cameroon':'africa','South Africa':'africa','Tunisia':'africa',
+  'Democratic Republic of the Congo':'africa','DR Congo':'africa',
+  'Ivory Coast':'africa',"Côte d'Ivoire":'africa',
+  'Algeria':'africa','Cape Verde':'africa','Cabo Verde':'africa',
+  // Asia
+  'Japan':'asia','South Korea':'asia','Korea Republic':'asia',
+  'Australia':'asia','Iran':'asia','Saudi Arabia':'asia',
   'Iraq':'asia','Jordan':'asia','Uzbekistan':'asia','Qatar':'asia',
+  // Oceania
   'New Zealand':'oceania',
 };
 

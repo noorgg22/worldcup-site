@@ -88,18 +88,7 @@ export default function RosterPage({ onTeamSelect }: Props) {
   const teams = getRegionTeams(activeRegion);
 
   return (
-    <div style={{ paddingTop: 64, minHeight: '100vh', background: 'var(--bg)' }}>
-
-      {/* Page hero */}
-      <div className="page-hero">
-        <div className="section-pill">⚽ World Cup 2026</div>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px,6vw,72px)', color: 'var(--white)', lineHeight: 1, marginBottom: 10 }}>
-          TEAM <span className="gold-text">ROSTERS</span>
-        </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: 14, maxWidth: 480, margin: '0 auto' }}>
-          Select a region to explore all {ROSTERS.length} confirmed squads, coaches, and player profiles.
-        </p>
-      </div>
+    <div style={{ paddingTop: 80, minHeight: '100vh', background: 'var(--bg)' }}>
 
       {/* Region tabs */}
       <div style={{
