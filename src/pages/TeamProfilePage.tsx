@@ -45,10 +45,10 @@ function PlayerCard({ player }: { player: Player }) {
       }}
     >
       {/* Photo area */}
-      <div style={{ position: 'relative', height: 160, background: 'var(--bg-card2)', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', height: 180, background: 'var(--bg-card2)', overflow: 'hidden' }}>
         {photo ? (
           <img src={photo} alt={player.name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 15%' }}
             onError={() => setPhoto(null)}
           />
         ) : (
@@ -173,7 +173,7 @@ export default function TeamProfilePage({ team, onBack }: Props) {
           }}>
             {coachPhoto ? (
               <img src={coachPhoto} alt={team.coach.name}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 15%' }}
                 onError={() => setCoachPhoto(null)}
               />
             ) : (
