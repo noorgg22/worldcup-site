@@ -186,9 +186,9 @@ export const ROSTERS: TeamRoster[] = [
   // ── GROUP C ─────────────────────────────────────────────────────────────────
   {
     country: 'Brazil', flag: '🇧🇷', confederation: 'CONMEBOL', region: 'south-america', group: 'C',
-    coach: { name: 'Dorival Júnior', age: 63, nationality: 'Brazilian', appointed: 'January 2024',
-      bio: 'Dorival Júnior arrived as Brazil\'s head coach in early 2024 following a turbulent period for the Seleção after their quarter-final exit at the 2022 World Cup. A vastly experienced domestic manager who claimed the Copa Libertadores with Flamengo in 2022 and won multiple Brazilian Serie A titles, Dorival brought pragmatism, collective discipline, and renewed team spirit to the dressing room. His emphasis on rebuilding squad harmony and restoring Brazil\'s attacking identity has been evident in their CONMEBOL qualifying campaign. With a generational crop of attacking talent — Vinicius Jr., Endrick, Rodrygo, and Raphinha — at his disposal, Dorival has the firepower to mount a serious challenge on American soil, where Brazil famously lifted the trophy in 1994.',
-      wikiName: 'Dorival Júnior' },
+    coach: { name: 'Carlo Ancelotti', age: 66, nationality: 'Italian', appointed: 'June 2024',
+      bio: 'Carlo Ancelotti is the most decorated manager in Champions League history, having lifted the trophy a record four times with AC Milan and Real Madrid. His appointment as Brazil head coach was one of the most anticipated in football history — a long-pursued union between the world\'s most storied national team and its most successful club manager. Ancelotti brings a calm, authoritative presence and an extraordinary ability to manage elite egos, skills honed across decades at the top of European football with clubs including AC Milan, Chelsea, Paris Saint-Germain, Bayern Munich, Napoli, and Real Madrid. His man-management philosophy — built on trust, simplicity, and empowering players to express themselves — is perfectly suited to a Brazilian squad bursting with creative attacking talent. With Vinicius Jr., Rodrygo, Raphinha, and Endrick at his disposal, Ancelotti has the firepower to end Brazil\'s 24-year World Cup drought on American soil, where the Seleção won their fifth title in 1994.',
+      wikiName: 'Carlo Ancelotti' },
     players: [
       p('Alisson',1,'GK','Liverpool',33,80,0,'Alisson Becker'),
       p('Ederson',12,'GK','Manchester City',31,32,0),
