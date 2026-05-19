@@ -30,31 +30,53 @@
     <meta name='impact-site-verification' value='2d47b623-b72b-4e22-ad12-fd4120e95f98'>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Pre-render content visible to crawlers before React loads -->
+      <div id="ssr-fallback" style="font-family:Georgia,serif;max-width:960px;margin:0 auto;padding:40px 24px;color:#111;background:#fff">
+        <header style="border-bottom:3px solid #f5c842;padding-bottom:20px;margin-bottom:32px">
+          <h1 style="font-size:2.4rem;margin:0 0 8px">⚽ FIFA World Cup 2026 — The Complete Fan Guide</h1>
+          <p style="font-size:1.1rem;color:#444;margin:0">Your destination for fixtures, team rosters, venues, group standings, and World Cup history.</p>
+        </header>
 
-    <!-- Fallback content for crawlers that don't execute JavaScript -->
-    <noscript>
-      <div style="font-family:sans-serif;max-width:900px;margin:40px auto;padding:0 20px;color:#111">
-        <h1>FIFA World Cup 2026 — The Ultimate Fan Guide</h1>
-        <p>Welcome to the most comprehensive FIFA World Cup 2026 resource. The 2026 FIFA World Cup is hosted across the United States, Canada, and Mexico — the first tournament to feature 48 nations competing across 16 groups.</p>
+        <article>
+          <h2>About the 2026 FIFA World Cup</h2>
+          <p>The 2026 FIFA World Cup is the 23rd edition of the world's most prestigious football tournament, hosted jointly by the United States, Canada, and Mexico. It is the first World Cup to feature an expanded 48-team format, with 16 groups of 3 teams each progressing to a 32-team knockout round. The tournament runs from June 11 to July 19, 2026, culminating in the final at MetLife Stadium in East Rutherford, New Jersey.</p>
 
-        <h2>Team Rosters</h2>
-        <p>Explore the full 26-man squads for all 48 qualified nations across Europe (UEFA), South America (CONMEBOL), North & Central America (CONCACAF), Africa (CAF), Asia (AFC), and Oceania (OFC). Each team page includes player profiles with age, caps, goals, club, and coach biography.</p>
+          <h2>Qualified Teams &amp; Rosters</h2>
+          <p>All 48 qualified nations are represented with their full 26-man squads, including player profiles (position, club, age, caps, goals) and head coach biographies. Teams are organized by confederation:</p>
+          <ul>
+            <li><strong>UEFA (Europe) — 16 teams:</strong> France, Spain, Germany, England, Portugal, Netherlands, Belgium, Switzerland, Croatia, Denmark, Austria, Scotland, Serbia, Turkey, Poland, Hungary, Sweden, Norway, Czechia, Bosnia &amp; Herzegovina</li>
+            <li><strong>CONMEBOL (South America) — 6 teams:</strong> Argentina, Brazil, Uruguay, Colombia, Ecuador, Venezuela, Paraguay</li>
+            <li><strong>CONCACAF (North &amp; Central America) — 6 teams:</strong> United States, Canada, Mexico, Panama, Honduras, Jamaica, Haiti</li>
+            <li><strong>CAF (Africa) — 9 teams:</strong> Morocco, Senegal, Egypt, Nigeria, Ghana, Cameroon, South Africa, Tunisia, DR Congo, Côte d'Ivoire, Algeria, Cabo Verde</li>
+            <li><strong>AFC (Asia) — 8 teams:</strong> Japan, South Korea, Australia, Iran, Saudi Arabia, Iraq, Jordan, Uzbekistan, Qatar</li>
+            <li><strong>OFC (Oceania) — 1 team:</strong> New Zealand</li>
+          </ul>
 
-        <h2>Match Schedule &amp; Fixtures</h2>
-        <p>Full fixture list for all group stage matches, knockout rounds, quarter-finals, semi-finals and the World Cup Final at MetLife Stadium in New York/New Jersey on July 19, 2026.</p>
+          <h2>Group Stage Draw</h2>
+          <p>The 48 teams are divided into 16 groups (A–P), with the top two from each group advancing to the Round of 32. Notable groups include Group A (host nation USA), and groups featuring traditional powerhouses such as Argentina, Brazil, France, and Spain.</p>
 
-        <h2>Group Standings</h2>
-        <p>Follow all 16 groups — A through P — with every nation's path to the knockout stage. Groups include heavyweights like Argentina, Brazil, France, Spain, England, Germany, Portugal, and the USA.</p>
+          <h2>Match Schedule &amp; Fixtures</h2>
+          <p>The full fixture list covers every group stage match, Round of 32, Round of 16, quarter-finals, semi-finals, the third-place playoff, and the World Cup Final on July 19, 2026. Matches are spread across 16 venues in 16 host cities across the USA, Canada, and Mexico.</p>
 
-        <h2>Stadiums &amp; Venues</h2>
-        <p>16 world-class stadiums across North America host matches in 2026: MetLife Stadium (New York), AT&amp;T Stadium (Dallas), SoFi Stadium (Los Angeles), Levi's Stadium (San Francisco), Arrowhead Stadium (Kansas City), Gillette Stadium (Boston), Lincoln Financial Field (Philadelphia), Hard Rock Stadium (Miami), NRG Stadium (Houston), Empower Field (Denver), Lumen Field (Seattle), BC Place (Vancouver), BMO Field (Toronto), Estadio Azteca (Mexico City), Estadio BBVA (Monterrey), and Estadio Akron (Guadalajara).</p>
+          <h2>Stadiums &amp; Host Venues</h2>
+          <p>Sixteen world-class stadiums host the 2026 World Cup:</p>
+          <ul>
+            <li><strong>United States (11):</strong> MetLife Stadium (New York/New Jersey) — Final venue; AT&amp;T Stadium (Dallas); SoFi Stadium (Los Angeles); Levi's Stadium (San Francisco Bay Area); Arrowhead Stadium (Kansas City); Gillette Stadium (Boston); Lincoln Financial Field (Philadelphia); Hard Rock Stadium (Miami); NRG Stadium (Houston); Empower Field at Mile High (Denver); Lumen Field (Seattle)</li>
+            <li><strong>Canada (2):</strong> BC Place (Vancouver); BMO Field (Toronto)</li>
+            <li><strong>Mexico (3):</strong> Estadio Azteca (Mexico City); Estadio BBVA (Monterrey); Estadio Akron (Guadalajara)</li>
+          </ul>
 
-        <h2>World Cup Records &amp; History</h2>
-        <p>Deep dive into World Cup history from Uruguay 1930 through Qatar 2022 — all-time top scorers, most appearances, biggest upsets, golden boot winners, and every World Cup champion.</p>
+          <h2>World Cup Records &amp; History</h2>
+          <p>Explore the complete history of the FIFA World Cup from the inaugural 1930 tournament in Uruguay through Qatar 2022. Records covered include all-time leading scorers (Miroslav Klose — 16 goals), most appearances, biggest upsets, Golden Boot and Golden Glove winners, and a year-by-year breakdown of every World Cup champion. Brazil leads all nations with 5 titles (1958, 1962, 1970, 1994, 2002), followed by Germany and Italy with 4 each, Argentina and France with 3 and 2 respectively.</p>
+        </article>
 
-        <p>Please enable JavaScript to use the full interactive experience.</p>
+        <p style="margin-top:40px;color:#888;font-size:0.85rem">Loading interactive experience... (JavaScript required for full functionality)</p>
       </div>
+    </div>
+
+    <noscript>
+      <style>#ssr-fallback { display: block !important; }</style>
     </noscript>
 
     <script type="module" src="/src/main.tsx"></script>
