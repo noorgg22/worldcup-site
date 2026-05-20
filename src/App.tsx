@@ -10,11 +10,13 @@ import VenuePage from './pages/VenuePage';
 import MatchCenterPage from './pages/MatchCenterPage';
 import RecordsPage from './pages/RecordsPage';
 import HistoryPage from './pages/HistoryPage';
+import ArticlesPage from './pages/ArticlesPage';
+import PrivacyPage from './pages/PrivacyPage';
 import CountryProfileModal from './components/CountryProfileModal';
 import type { Venue } from './data/venues';
 import type { TeamRoster } from './data/rosters';
 
-export type Page = 'home' | 'groups' | 'roster' | 'teamprofile' | 'venue' | 'matches' | 'records' | 'history';
+export type Page = 'home' | 'groups' | 'roster' | 'teamprofile' | 'venue' | 'matches' | 'records' | 'history' | 'articles' | 'privacy';
 
 export default function App() {
   const [history, setHistory] = useState<Page[]>(['home']);
@@ -46,6 +48,13 @@ export default function App() {
 
   const canGoBack = history.length > 1;
 
+  // Footer nav events
+  useState(() => {
+    const handler = (e: Event) => navTo((e as CustomEvent).detail as Page);
+    window.addEventListener('navto', handler);
+    return () => window.removeEventListener('navto', handler);
+  });
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <Analytics />
@@ -57,6 +66,8 @@ export default function App() {
       {page === 'matches'     && <MatchCenterPage onCountryClick={openCountry} onVenueNav={navToVenue} />}
       {page === 'records'     && <RecordsPage onCountryClick={openCountry} />}
       {page === 'history'     && <HistoryPage />}
+      {page === 'articles'    && <ArticlesPage />}
+      {page === 'privacy'     && <PrivacyPage />}
       {page === 'venue' && selectedVenue && (
         <VenuePage venue={selectedVenue} onBack={navBack} />
       )}
@@ -81,6 +92,7 @@ function Nav({ current, onNav, onBack, canGoBack }: {
 
   const links: { id: Page; label: string }[] = [
     { id: 'home',        label: 'Home' },
+    { id: 'articles',    label: 'Articles' },
     { id: 'matches',     label: 'Matches' },
     { id: 'groups',      label: 'Groups' },
     { id: 'records',     label: 'Records' },

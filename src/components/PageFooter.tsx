@@ -44,7 +44,7 @@ export default function PageFooter() {
       {/* Footer links */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        gap: 6, flexWrap: 'wrap',
+        gap: 6, flexWrap: 'wrap', marginBottom: 14,
       }}>
         <span style={{ fontSize: 16 }}>⚽</span>
         <span style={{
@@ -55,6 +55,22 @@ export default function PageFooter() {
         <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>
           Fan-made. All stats sourced from FIFA official records.
         </span>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 20 }}>
+        <a
+          href="#privacy"
+          onClick={e => { e.preventDefault(); window.dispatchEvent(new CustomEvent('navto', { detail: 'privacy' })); }}
+          style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', textDecoration: 'none', cursor: 'pointer' }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.3)')}
+        >Privacy Policy</a>
+        <a
+          href="#articles"
+          onClick={e => { e.preventDefault(); window.dispatchEvent(new CustomEvent('navto', { detail: 'articles' })); }}
+          style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', textDecoration: 'none', cursor: 'pointer' }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.3)')}
+        >Articles</a>
       </div>
     </footer>
   );
