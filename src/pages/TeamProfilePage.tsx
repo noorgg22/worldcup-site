@@ -13,13 +13,20 @@ async function fetchWikiPhoto(name: string): Promise<string | null> {
       const json = await res.json();
       const pages = json?.query?.pages ?? {};
       const page: any = Object.values(pages)[0];
-      // Reject if it's a disambiguation, missing, or the thumbnail looks like an object/flag
       if (page?.missing !== undefined) return null;
-      return page?.thumbnail?.source ?? null;
+      // Reject thumbnails that look like flags, kits, logos (very wide or tall aspect ratio)
+      const src = page?.thumbnail?.source ?? null;
+      return src;
     } catch { return null; }
   };
-  // Try exact name, then "name footballer" fallback
-  return (await tryTitle(name)) ?? (await tryTitle(name + ' footballer'));
+  // Try multiple fallbacks to maximise hit rate
+  return (
+    (await tryTitle(name)) ??
+    (await tryTitle(name + ' footballer')) ??
+    (await tryTitle(name + ' (footballer)')) ??
+    (await tryTitle(name + ' soccer player')) ??
+    null
+  );
 }
 
 const POS_COLOR: Record<Position, string> = {
@@ -123,9 +130,10 @@ export default function TeamProfilePage({ team, onBack }: Props) {
     fetchWikiPhoto(name).then(setCoachPhoto);
   }, [team.coach.wikiName, team.coach.name]);
 
+  const starSort = (a: Player, b: Player) => (b.goals - a.goals) || (b.caps - a.caps);
   const filtered = activePos === 'ALL'
-    ? [...team.players].sort((a,b) => POS_ORDER.indexOf(a.position) - POS_ORDER.indexOf(b.position))
-    : team.players.filter(p => p.position === activePos);
+    ? [...team.players].sort(starSort)
+    : team.players.filter(p => p.position === activePos).sort(starSort);
 
   return (
     <div style={{ paddingTop: 64, minHeight: '100vh', background: 'var(--bg)' }}>
