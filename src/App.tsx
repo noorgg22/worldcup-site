@@ -92,12 +92,12 @@ function Nav({ current, onNav, onBack, canGoBack }: {
 
   const links: { id: Page; label: string }[] = [
     { id: 'home',        label: 'Home' },
-    { id: 'articles',    label: 'Articles' },
     { id: 'matches',     label: 'Matches' },
     { id: 'groups',      label: 'Groups' },
     { id: 'records',     label: 'Records' },
     { id: 'history',     label: 'History' },
     { id: 'roster',      label: 'Roster' },
+    { id: 'articles',    label: 'Articles' },
   ];
 
   function handleNav(p: Page) {

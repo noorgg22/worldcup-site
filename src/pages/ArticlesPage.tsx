@@ -43,7 +43,6 @@ function ArticleCard({ article, onClick }: { article: Article; onClick: () => vo
             color: color, fontSize: 9, fontWeight: 700,
             letterSpacing: '0.14em', padding: '3px 9px', borderRadius: 100,
           }}>{article.category.toUpperCase()}</span>
-          <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>{article.readTime} min read</span>
           <span style={{ fontSize: 11, color: 'var(--text-dim)', marginLeft: 'auto' }}>{article.date}</span>
         </div>
 
@@ -103,7 +102,7 @@ function ArticleView({ article, onBack }: { article: Article; onBack: () => void
           color: color, fontSize: 9, fontWeight: 700,
           letterSpacing: '0.14em', padding: '3px 9px', borderRadius: 100,
         }}>{article.category.toUpperCase()}</span>
-        <span style={{ fontSize: 12, color: 'var(--text-dim)' }}>{article.date} · {article.readTime} min read</span>
+        <span style={{ fontSize: 12, color: 'var(--text-dim)' }}>{article.date}</span>
       </div>
 
       {/* Title */}
