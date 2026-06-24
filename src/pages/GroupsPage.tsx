@@ -1,4 +1,4 @@
-import { mockStandings } from '../mock/standings';
+import { ALL_MATCHES, computeStandings } from '../data/matches';
 import type { StandingsRow } from '../types';
 import PageFooter from '../components/PageFooter';
 import { useIsMobile } from '../hooks/useIsMobile';
@@ -7,7 +7,8 @@ const GROUPS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
 
 export default function GroupsPage({ onCountryClick }: { onCountryClick?: (name: string) => void }) {
   const isMobile = useIsMobile();
-  const byGroup = (g: string) => mockStandings.filter(r => r.team.group === g);
+  const standings = computeStandings(ALL_MATCHES.filter(m => m.round === 'group'));
+  const byGroup = (g: string) => standings.filter(r => r.team.group === g);
 
   return (
     <div style={{ paddingTop: 64, maxWidth: 1200, margin: '0 auto', padding: isMobile ? '80px 16px 40px' : '80px 24px' }}>

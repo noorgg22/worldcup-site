@@ -4,29 +4,42 @@ import { useIsMobile } from '../hooks/useIsMobile';
 
 interface Props { team: TeamRoster; onBack: () => void; }
 
+// Module-level cache so photos persist across navigation within a session
+const photoCache = new Map<string, string | null>();
+// Pending promises to avoid duplicate in-flight requests
+const pendingFetches = new Map<string, Promise<string | null>>();
+
 async function fetchWikiPhoto(name: string): Promise<string | null> {
-  const tryTitle = async (title: string): Promise<string | null> => {
-    try {
-      const res = await fetch(
-        `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=pageimages&format=json&pithumbsize=400&origin=*`
-      );
-      const json = await res.json();
-      const pages = json?.query?.pages ?? {};
-      const page: any = Object.values(pages)[0];
-      if (page?.missing !== undefined) return null;
-      // Reject thumbnails that look like flags, kits, logos (very wide or tall aspect ratio)
-      const src = page?.thumbnail?.source ?? null;
-      return src;
-    } catch { return null; }
+  if (photoCache.has(name)) return photoCache.get(name)!;
+  if (pendingFetches.has(name)) return pendingFetches.get(name)!;
+
+  const doFetch = async (): Promise<string | null> => {
+    const tryTitle = async (title: string): Promise<string | null> => {
+      try {
+        const res = await fetch(
+          `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=pageimages&format=json&pithumbsize=400&origin=*`
+        );
+        const json = await res.json();
+        const pages = json?.query?.pages ?? {};
+        const page: any = Object.values(pages)[0];
+        if (page?.missing !== undefined) return null;
+        return page?.thumbnail?.source ?? null;
+      } catch { return null; }
+    };
+    const result = (
+      (await tryTitle(name)) ??
+      (await tryTitle(name + ' footballer')) ??
+      (await tryTitle(name + ' (footballer)')) ??
+      null
+    );
+    photoCache.set(name, result);
+    pendingFetches.delete(name);
+    return result;
   };
-  // Try multiple fallbacks to maximise hit rate
-  return (
-    (await tryTitle(name)) ??
-    (await tryTitle(name + ' footballer')) ??
-    (await tryTitle(name + ' (footballer)')) ??
-    (await tryTitle(name + ' soccer player')) ??
-    null
-  );
+
+  const promise = doFetch();
+  pendingFetches.set(name, promise);
+  return promise;
 }
 
 const POS_COLOR: Record<Position, string> = {
@@ -34,12 +47,19 @@ const POS_COLOR: Record<Position, string> = {
 };
 const POS_ORDER: Position[] = ['GK','DEF','MID','FWD'];
 
-function PlayerCard({ player }: { player: Player }) {
-  const [photo, setPhoto]   = useState<string | null>(null);
+function PlayerCard({ player, index = 0 }: { player: Player; index?: number }) {
+  const [photo, setPhoto] = useState<string | null>(photoCache.get(player.wikiName || player.name) ?? null);
   useEffect(() => {
     const name = player.wikiName || player.name;
-    fetchWikiPhoto(name).then(url => setPhoto(url));
-  }, [player.wikiName, player.name]);
+    // If already cached, nothing to do
+    if (photoCache.has(name)) { setPhoto(photoCache.get(name) ?? null); return; }
+    // Stagger requests by index to avoid rate limiting (50ms apart)
+    const delay = (index % 10) * 80;
+    const timer = setTimeout(() => {
+      fetchWikiPhoto(name).then(url => setPhoto(url));
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [player.wikiName, player.name, index]);
 
   return (
     <div style={{
@@ -240,7 +260,7 @@ export default function TeamProfilePage({ team, onBack }: Props) {
         }}>
           {filtered.map((player, i) => (
             <div key={player.name} style={{ animation: `fadeUp 0.35s ease both`, animationDelay: `${i * 0.04}s` }}>
-              <PlayerCard player={player} />
+              <PlayerCard player={player} index={i} />
             </div>
           ))}
         </div>
