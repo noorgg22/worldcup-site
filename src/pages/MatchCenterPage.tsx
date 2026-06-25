@@ -1,7 +1,7 @@
-import { useState, useMemo, useEffect, useRef, type ReactNode } from 'react';
+import { useState, useMemo, useEffect, useRef, Fragment, type ReactNode } from 'react';
 import { useIsMobile } from '../hooks/useIsMobile';
-import { ALL_MATCHES, KNOCKOUT_ROUNDS } from '../data/matches';
-import type { Match, MatchStatsFull } from '../data/matches';
+import { ALL_MATCHES } from '../data/matches';
+import type { Match, MatchStatsFull, MatchRound } from '../data/matches';
 import { GROUP_COLORS } from '../data/wcStats';
 import VenueGlobe from '../components/VenueGlobe';
 import Flag from '../components/Flag';
@@ -84,19 +84,22 @@ export default function MatchCenterPage({ onCountryClick, onVenueNav }: { onCoun
   const isMobile = useIsMobile();
   const [roundTab, setRoundTab]       = useState<'group' | 'knockout'>('group');
   const [groupFilter, setGroupFilter] = useState<string>('all');
+  const [mdFilter, setMdFilter]       = useState<'all' | 1 | 2 | 3>('all');
   const [search, setSearch]           = useState('');
   const [expandedId, setExpandedId]   = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     return ALL_MATCHES.filter(m => {
+      if (m.round !== 'group') return false;
       if (groupFilter !== 'all' && m.group !== groupFilter) return false;
+      if (mdFilter !== 'all' && m.matchday !== mdFilter) return false;
       if (search) {
         const q = search.toLowerCase();
         return m.home.name.toLowerCase().includes(q) || m.away.name.toLowerCase().includes(q);
       }
       return true;
     });
-  }, [groupFilter, search]);
+  }, [groupFilter, mdFilter, search]);
 
   // Group by date for display
   const byDate = useMemo(() => {
@@ -178,7 +181,7 @@ export default function MatchCenterPage({ onCountryClick, onVenueNav }: { onCoun
               {(['group', 'knockout'] as const).map(tab => (
                 <button
                   key={tab}
-                  onClick={() => { setRoundTab(tab); setGroupFilter('all'); }}
+                  onClick={() => { setRoundTab(tab); setGroupFilter('all'); setMdFilter('all'); }}
                   style={{
                     flex: isMobile ? 1 : undefined,
                     background: roundTab === tab
@@ -221,37 +224,32 @@ export default function MatchCenterPage({ onCountryClick, onVenueNav }: { onCoun
             </div>
           </div>
 
-          {/* Group pills — horizontal scroll, single row */}
+          {/* Group pills + Matchday filter — group stage only */}
           {roundTab === 'group' && (
-            <div style={{ position: 'relative', marginBottom: 14 }}>
-              <div style={{
-                display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2,
-                scrollbarWidth: 'none', msOverflowStyle: 'none',
-              }}>
-                {/* "All" pill */}
-                <button
-                  onClick={() => setGroupFilter('all')}
-                  style={{
-                    flexShrink: 0,
-                    background: groupFilter === 'all' ? 'rgba(245,200,66,0.14)' : 'transparent',
-                    border: groupFilter === 'all' ? '1px solid rgba(245,200,66,0.4)' : '1px solid var(--border)',
-                    color: groupFilter === 'all' ? 'var(--gold)' : 'var(--text-muted)',
-                    fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11,
-                    letterSpacing: '0.08em', textTransform: 'uppercase',
-                    padding: '5px 14px', borderRadius: 7, cursor: 'pointer', transition: 'all 0.15s',
-                  }}
-                >
-                  All
-                </button>
-
-                {GROUPS.map(g => {
-                  const c = GROUP_COLORS[g];
-                  const active = groupFilter === g;
-                  return (
-                    <button
-                      key={g}
-                      onClick={() => setGroupFilter(active ? 'all' : g)}
-                      style={{
+            <>
+              {/* Group pills — horizontal scroll */}
+              <div style={{ position: 'relative', marginBottom: 8 }}>
+                <div style={{
+                  display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2,
+                  scrollbarWidth: 'none', msOverflowStyle: 'none',
+                }}>
+                  <button
+                    onClick={() => setGroupFilter('all')}
+                    style={{
+                      flexShrink: 0,
+                      background: groupFilter === 'all' ? 'rgba(245,200,66,0.14)' : 'transparent',
+                      border: groupFilter === 'all' ? '1px solid rgba(245,200,66,0.4)' : '1px solid var(--border)',
+                      color: groupFilter === 'all' ? 'var(--gold)' : 'var(--text-muted)',
+                      fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11,
+                      letterSpacing: '0.08em', textTransform: 'uppercase',
+                      padding: '5px 14px', borderRadius: 7, cursor: 'pointer', transition: 'all 0.15s',
+                    }}
+                  >All</button>
+                  {GROUPS.map(g => {
+                    const c = GROUP_COLORS[g];
+                    const active = groupFilter === g;
+                    return (
+                      <button key={g} onClick={() => setGroupFilter(active ? 'all' : g)} style={{
                         flexShrink: 0,
                         background: active ? `${c}20` : 'transparent',
                         border: active ? `1px solid ${c}55` : '1px solid var(--border)',
@@ -260,20 +258,38 @@ export default function MatchCenterPage({ onCountryClick, onVenueNav }: { onCoun
                         letterSpacing: '0.08em', textTransform: 'uppercase',
                         padding: '5px 13px', borderRadius: 7, cursor: 'pointer', transition: 'all 0.15s',
                         boxShadow: active ? `0 0 10px ${c}30` : 'none',
-                      }}
-                    >
-                      {g}
+                      }}>{g}</button>
+                    );
+                  })}
+                </div>
+                <div style={{
+                  position: 'absolute', right: 0, top: 0, bottom: 2, width: 40,
+                  background: 'linear-gradient(to right, transparent, rgba(6,9,15,0.92))',
+                  pointerEvents: 'none',
+                }} />
+              </div>
+
+              {/* Matchday filter */}
+              <div style={{ display: 'flex', gap: 6, marginBottom: 14, alignItems: 'center' }}>
+                <span style={{ fontSize: 10, color: 'var(--text-muted)', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600, flexShrink: 0, marginRight: 2 }}>MD</span>
+                {(['all', 1, 2, 3] as const).map(md => {
+                  const active = mdFilter === md;
+                  return (
+                    <button key={md} onClick={() => setMdFilter(md)} style={{
+                      flexShrink: 0,
+                      background: active ? 'rgba(245,200,66,0.12)' : 'transparent',
+                      border: active ? '1px solid rgba(245,200,66,0.38)' : '1px solid var(--border)',
+                      color: active ? 'var(--gold)' : 'var(--text-muted)',
+                      fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11,
+                      letterSpacing: '0.08em', textTransform: 'uppercase',
+                      padding: '4px 12px', borderRadius: 7, cursor: 'pointer', transition: 'all 0.15s',
+                    }}>
+                      {md === 'all' ? 'All' : `MD${md}`}
                     </button>
                   );
                 })}
               </div>
-              {/* Right fade hint */}
-              <div style={{
-                position: 'absolute', right: 0, top: 0, bottom: 2, width: 40,
-                background: 'linear-gradient(to right, transparent, rgba(6,9,15,0.92))',
-                pointerEvents: 'none',
-              }} />
-            </div>
+            </>
           )}
         </div>
       </div>
@@ -336,60 +352,23 @@ export default function MatchCenterPage({ onCountryClick, onVenueNav }: { onCoun
             <RevealSection>
               <div style={{
                 background: 'rgba(245,200,66,0.06)', border: '1px solid rgba(245,200,66,0.18)',
-                borderRadius: 16, padding: '24px 28px', marginBottom: 28,
-                display: 'flex', alignItems: 'center', gap: 16,
+                borderRadius: 14, padding: '16px 20px', marginBottom: 24,
+                display: 'flex', alignItems: 'center', gap: 14,
               }}>
-                <span style={{ fontSize: 32 }}>🏆</span>
+                <span style={{ fontSize: 28 }}>🏆</span>
                 <div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--white)', marginBottom: 4 }}>
-                    Knockout Stage Begins July 4
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--white)', marginBottom: 2 }}>
+                    Knockout Stage — Bracket auto-updates as matches are played
                   </div>
-                  <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                    32 teams advance from the group stage. Matchups confirmed after final group matches on July 1–2.
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                    R32 begins July 4 · 32 teams · Single elimination
                   </div>
                 </div>
               </div>
             </RevealSection>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {KNOCKOUT_ROUNDS.map((r, i) => (
-                <RevealSection key={r.round} delay={i * 0.07}>
-                  <div style={{
-                    background: 'var(--bg-card)', border: '1px solid var(--border)',
-                    borderRadius: 14, padding: '20px 24px',
-                    display: 'flex', alignItems: 'center', gap: 18,
-                    transition: 'border-color 0.2s',
-                  }}
-                    onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(245,200,66,0.2)'}
-                    onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border)'}
-                  >
-                    <div style={{
-                      width: 48, height: 48, borderRadius: 12, flexShrink: 0,
-                      background: 'rgba(245,200,66,0.07)', border: '1px solid rgba(245,200,66,0.18)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20,
-                    }}>
-                      {r.icon}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--white)', marginBottom: 3 }}>
-                        {r.label}
-                      </div>
-                      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                        {r.dates} · {r.matches} {r.matches === 1 ? 'match' : 'matches'}
-                      </div>
-                    </div>
-                    <div style={{
-                      background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)',
-                      borderRadius: 7, padding: '5px 12px',
-                      fontSize: 10, color: 'var(--text-muted)', fontWeight: 700,
-                      letterSpacing: '0.1em', textTransform: 'uppercase',
-                    }}>
-                      TBD
-                    </div>
-                  </div>
-                </RevealSection>
-              ))}
-            </div>
+            <RevealSection delay={0.06}>
+              <KnockoutBracket onCountryClick={onCountryClick} />
+            </RevealSection>
           </div>
         )}
 
@@ -399,6 +378,153 @@ export default function MatchCenterPage({ onCountryClick, onVenueNav }: { onCoun
   );
 }
 
+
+// ── Knockout Bracket ─────────────────────────────────────────────────────────
+const BR_TOTAL_H = 1088;
+const BR_SLOT_H  = 64;
+const BR_COL_W   = 175;
+const BR_CONN_W  = 32;
+const BR_HEADER_H = 36;
+
+const BR_ROUNDS: { id: MatchRound; label: string; count: number }[] = [
+  { id: 'r32',   label: 'Round of 32',    count: 16 },
+  { id: 'r16',   label: 'Round of 16',    count: 8  },
+  { id: 'qf',    label: 'Quarter-Finals', count: 4  },
+  { id: 'sf',    label: 'Semi-Finals',    count: 2  },
+  { id: 'final', label: 'Final',          count: 1  },
+];
+
+function brCardTop(count: number, index: number): number {
+  const spacing = BR_TOTAL_H / count;
+  return index * spacing + (spacing - BR_SLOT_H) / 2;
+}
+
+function BracketMatchCard({ match, isFinal, onCountryClick }: {
+  match?: Match; isFinal?: boolean; onCountryClick?: (n: string) => void;
+}) {
+  const borderColor = match?.status === 'completed'
+    ? 'rgba(102,187,106,0.3)'
+    : match?.status === 'live'
+    ? 'rgba(239,83,80,0.35)'
+    : isFinal
+    ? 'rgba(245,200,66,0.22)'
+    : 'var(--border)';
+
+  return (
+    <div style={{
+      height: '100%', background: 'var(--bg-card)',
+      border: `1px solid ${borderColor}`,
+      borderRadius: 8, display: 'flex', flexDirection: 'column',
+      justifyContent: 'center', padding: '6px 8px',
+    }}>
+      {(['home', 'away'] as const).map((side, si) => {
+        const team = match?.[side];
+        return (
+          <div key={side} style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: si === 0 ? 4 : 0 }}>
+            {team ? (
+              <>
+                <span style={{ fontSize: 13, flexShrink: 0 }}>{team.flag}</span>
+                <span
+                  style={{
+                    flex: 1, fontSize: 10, fontWeight: 600, color: 'var(--white)',
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    cursor: onCountryClick ? 'pointer' : 'default',
+                  }}
+                  onClick={() => onCountryClick?.(team.name)}
+                >{team.name}</span>
+                {match?.status !== 'upcoming' && (
+                  <span style={{
+                    fontFamily: 'var(--font-display)', fontSize: 13,
+                    color: 'var(--white)', minWidth: 14, textAlign: 'right', flexShrink: 0,
+                  }}>{team.score ?? 0}</span>
+                )}
+              </>
+            ) : (
+              <>
+                <div style={{ width: 16, height: 16, borderRadius: 3, background: 'rgba(255,255,255,0.05)', flexShrink: 0 }} />
+                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', fontStyle: 'italic' }}>TBD</span>
+              </>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function KnockoutBracket({ onCountryClick }: { onCountryClick?: (n: string) => void }) {
+  const koMatches = useMemo(() => ALL_MATCHES.filter(m => m.round !== 'group'), []);
+
+  const byRound = useMemo(() => {
+    const map = new Map<MatchRound, Match[]>();
+    BR_ROUNDS.forEach(r => map.set(r.id, []));
+    koMatches.forEach(m => map.get(m.round)?.push(m));
+    return map;
+  }, [koMatches]);
+
+  const totalW = BR_ROUNDS.length * (BR_COL_W + BR_CONN_W) - BR_CONN_W;
+  const totalContainerH = BR_TOTAL_H + BR_HEADER_H;
+
+  return (
+    <div style={{ overflowX: 'auto', paddingBottom: 24 }}>
+      <div style={{ position: 'relative', width: totalW, height: totalContainerH, minWidth: totalW }}>
+
+        {BR_ROUNDS.map((round, colIdx) => {
+          const colLeft = colIdx * (BR_COL_W + BR_CONN_W);
+          const matches = byRound.get(round.id) || [];
+
+          return (
+            <Fragment key={round.id}>
+              {/* Column header */}
+              <div style={{
+                position: 'absolute', left: colLeft, top: 0, width: BR_COL_W, height: BR_HEADER_H,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 9,
+                color: round.id === 'final' ? 'var(--gold)' : 'var(--text-muted)',
+                letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 700,
+              }}>
+                {round.label}
+              </div>
+
+              {/* Match slots */}
+              {Array.from({ length: round.count }, (_, i) => {
+                const match = matches[i];
+                const top = BR_HEADER_H + brCardTop(round.count, i);
+                return (
+                  <div key={i} style={{ position: 'absolute', left: colLeft, top, width: BR_COL_W, height: BR_SLOT_H }}>
+                    <BracketMatchCard match={match} isFinal={round.id === 'final'} onCountryClick={onCountryClick} />
+                  </div>
+                );
+              })}
+
+              {/* SVG connectors to next round */}
+              {colIdx < BR_ROUNDS.length - 1 && (
+                <svg
+                  style={{ position: 'absolute', left: colLeft + BR_COL_W, top: 0, overflow: 'visible' }}
+                  width={BR_CONN_W}
+                  height={totalContainerH}
+                >
+                  {Array.from({ length: round.count / 2 }, (_, i) => {
+                    const spacing = BR_TOTAL_H / round.count;
+                    const topY  = BR_HEADER_H + (i * 2)     * spacing + spacing / 2;
+                    const botY  = BR_HEADER_H + (i * 2 + 1) * spacing + spacing / 2;
+                    const midY  = (topY + botY) / 2;
+                    return (
+                      <g key={i} stroke="rgba(255,255,255,0.1)" strokeWidth={1} fill="none">
+                        <line x1={0} y1={topY} x2={0} y2={botY} />
+                        <line x1={0} y1={midY} x2={BR_CONN_W} y2={midY} />
+                      </g>
+                    );
+                  })}
+                </svg>
+              )}
+            </Fragment>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 // ── Match Card ────────────────────────────────────────────────────────────────
 function MatchCard({ match: m, expanded, onToggle, onCountryClick }: {
