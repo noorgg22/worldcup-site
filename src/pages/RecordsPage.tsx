@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import PageFooter from '../components/PageFooter';
 import { createPortal } from 'react-dom';
 import {
@@ -10,12 +10,13 @@ import {
   type TeamRecord,
   type TournamentRecord,
   type AllTimeStanding,
-
 } from '../data/records';
+import { ALL_MATCHES, type Match } from '../data/matches';
 
-type Tab = 'individual' | 'team' | 'tournament' | 'standings';
+type Tab = 'live2026' | 'individual' | 'team' | 'tournament' | 'standings';
 
 const TAB_CONFIG: { id: Tab; label: string; icon: string }[] = [
+  { id: 'live2026',   label: '2026 Live Records',  icon: '🔴' },
   { id: 'standings',  label: 'All-Time Standings',  icon: '📋' },
   { id: 'team',       label: 'Team Records',       icon: '🏆' },
   { id: 'individual', label: 'Player Records',     icon: '👤' },
@@ -23,7 +24,7 @@ const TAB_CONFIG: { id: Tab; label: string; icon: string }[] = [
 ];
 
 export default function RecordsPage({ onCountryClick }: { onCountryClick?: (name: string) => void }) {
-  const [tab, setTab] = useState<Tab>('standings');
+  const [tab, setTab] = useState<Tab>('live2026');
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', paddingTop: 64 }}>
@@ -58,6 +59,7 @@ export default function RecordsPage({ onCountryClick }: { onCountryClick?: (name
 
       {/* Content */}
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 40px 80px' }}>
+        {tab === 'live2026'    && <Live2026Tab />}
         {tab === 'individual'  && <IndividualTab />}
         {tab === 'team'        && <TeamTab />}
         {tab === 'tournament'  && <TournamentTab />}
@@ -166,6 +168,228 @@ function RecordsHeroBanner() {
           <div style={{ width: 40, height: 1, background: 'rgba(245,200,66,0.7)' }} />
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ─── 2026 Live Records ─── */
+interface TeamStat {
+  name: string; flag: string;
+  scored: number; conceded: number; played: number;
+  wins: number; draws: number; losses: number;
+}
+
+function compute2026Stats(matches: Match[]) {
+  const completed = matches.filter(m => m.status === 'completed' && m.round === 'group');
+  const teamMap = new Map<string, TeamStat>();
+
+  let biggestWin: { margin: number; match: Match | null } = { margin: 0, match: null };
+  let highestScoring: { total: number; match: Match | null } = { total: 0, match: null };
+
+  for (const m of completed) {
+    const hs = m.home.score ?? 0;
+    const as_ = m.away.score ?? 0;
+    const total = hs + as_;
+    const margin = Math.abs(hs - as_);
+    if (margin > biggestWin.margin || (margin === biggestWin.margin && total > (biggestWin.match ? (biggestWin.match.home.score ?? 0) + (biggestWin.match.away.score ?? 0) : 0))) {
+      biggestWin = { margin, match: m };
+    }
+    if (total > highestScoring.total) highestScoring = { total, match: m };
+
+    for (const [side, scored, conceded] of [
+      [m.home, hs, as_],
+      [m.away, as_, hs],
+    ] as [typeof m.home, number, number][]) {
+      const s = teamMap.get(side.name) ?? { name: side.name, flag: side.flag, scored: 0, conceded: 0, played: 0, wins: 0, draws: 0, losses: 0 };
+      s.scored += scored; s.conceded += conceded; s.played++;
+      if (scored > conceded) s.wins++;
+      else if (scored === conceded) s.draws++;
+      else s.losses++;
+      teamMap.set(side.name, s);
+    }
+  }
+
+  const totalGoals = completed.reduce((sum, m) => sum + (m.home.score ?? 0) + (m.away.score ?? 0), 0);
+  const teams = Array.from(teamMap.values());
+
+  return {
+    gamesPlayed: completed.length,
+    totalGoals,
+    avgGoals: completed.length > 0 ? totalGoals / completed.length : 0,
+    biggestWin,
+    highestScoring,
+    topScorers: [...teams].sort((a, b) => b.scored - a.scored || a.played - b.played).slice(0, 10),
+    bestDefense: [...teams].filter(t => t.played >= 2).sort((a, b) => a.conceded - b.conceded || b.played - a.played).slice(0, 10),
+    perfect: [...teams].filter(t => t.wins === t.played && t.played >= 2).sort((a, b) => b.played - a.played),
+    scoreless: [...teams].filter(t => t.scored === 0 && t.played >= 2),
+  };
+}
+
+function StatBox({ label, value, sub }: { label: string; value: string; sub?: string }) {
+  return (
+    <div style={{
+      background: 'var(--bg-card)', border: '1px solid var(--border)',
+      borderRadius: 12, padding: '18px 20px', textAlign: 'center',
+    }}>
+      <div style={{ fontSize: 10, color: 'var(--text-muted)', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 700, marginBottom: 8 }}>{label}</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--gold)', letterSpacing: '0.06em', lineHeight: 1 }}>{value}</div>
+      {sub && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>{sub}</div>}
+    </div>
+  );
+}
+
+function Live2026Tab() {
+  const stats = useMemo(() => compute2026Stats(ALL_MATCHES), []);
+  const { gamesPlayed, totalGoals, avgGoals, biggestWin, highestScoring, topScorers, bestDefense, perfect, scoreless } = stats;
+
+  const bw = biggestWin.match;
+  const hs = highestScoring.match;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+      <div>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 12, background: 'rgba(239,83,80,0.1)', border: '1px solid rgba(239,83,80,0.3)', borderRadius: 100, padding: '4px 14px' }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef5350', display: 'inline-block', animation: 'pulse 1.5s infinite' }} />
+          <span style={{ fontSize: 10, color: '#ef5350', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Live · Group Stage</span>
+        </div>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,3vw,30px)', letterSpacing: '0.08em', color: '#fff', margin: '0 0 4px' }}>2026 TOURNAMENT RECORDS</h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: 14, margin: 0 }}>Auto-computed from all completed matches · Updates as results come in</p>
+      </div>
+
+      {/* Overview stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
+        <StatBox label="Games Played" value={String(gamesPlayed)} sub="of 72 group matches" />
+        <StatBox label="Total Goals" value={String(totalGoals)} sub="group stage" />
+        <StatBox label="Goals / Game" value={avgGoals.toFixed(2)} sub="tournament average" />
+        <StatBox label="Perfect Records" value={String(perfect.length)} sub={perfect.length > 0 ? perfect.map(t => t.flag).join(' ') : 'none yet'} />
+      </div>
+
+      {/* Standout match records */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 14 }}>
+        {bw && (
+          <div style={{ background: 'var(--bg-card)', border: '1px solid rgba(245,200,66,0.25)', borderRadius: 12, padding: '18px 20px' }}>
+            <div style={{ fontSize: 10, color: 'var(--gold)', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 700, marginBottom: 10 }}>🏆 Biggest Win</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <span style={{ fontSize: 28 }}>{bw.home.flag}</span>
+              <div>
+                <div style={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>{bw.home.name}</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>vs {bw.away.name} {bw.away.flag}</div>
+              </div>
+              <div style={{ marginLeft: 'auto', fontFamily: 'var(--font-display)', fontSize: 24, color: 'var(--gold)', letterSpacing: '0.08em' }}>
+                {bw.home.score}–{bw.away.score}
+              </div>
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{bw.date} · {bw.city} · Group {bw.group} · Margin: {biggestWin.margin}</div>
+          </div>
+        )}
+        {hs && (
+          <div style={{ background: 'var(--bg-card)', border: '1px solid rgba(79,195,247,0.25)', borderRadius: 12, padding: '18px 20px' }}>
+            <div style={{ fontSize: 10, color: '#4fc3f7', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 700, marginBottom: 10 }}>⚡ Highest Scoring Game</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <span style={{ fontSize: 28 }}>{hs.home.flag}</span>
+              <div>
+                <div style={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>{hs.home.name}</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>vs {hs.away.name} {hs.away.flag}</div>
+              </div>
+              <div style={{ marginLeft: 'auto', fontFamily: 'var(--font-display)', fontSize: 24, color: '#4fc3f7', letterSpacing: '0.08em' }}>
+                {hs.home.score}–{hs.away.score}
+              </div>
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{hs.date} · {hs.city} · {highestScoring.total} total goals</div>
+          </div>
+        )}
+      </div>
+
+      {/* Top Scorers + Best Defense side by side */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20 }}>
+
+        {/* Top Scoring Teams */}
+        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
+          <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', background: 'rgba(245,200,66,0.05)' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--gold)', letterSpacing: '0.08em' }}>⚽ TOP SCORING TEAMS</span>
+          </div>
+          {topScorers.map((t, i) => {
+            const maxGoals = topScorers[0]?.scored ?? 1;
+            const pct = (t.scored / maxGoals) * 100;
+            return (
+              <div key={t.name} style={{ padding: '10px 18px', borderBottom: i < topScorers.length - 1 ? '1px solid rgba(255,255,255,0.04)' : undefined, position: 'relative' }}>
+                <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${pct}%`, background: 'rgba(245,200,66,0.06)', pointerEvents: 'none' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}>
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 18, textAlign: 'right', flexShrink: 0 }}>{i + 1}</span>
+                  <span style={{ fontSize: 18 }}>{t.flag}</span>
+                  <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: '#fff', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</span>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--gold)', flexShrink: 0 }}>{t.scored}</span>
+                  <span style={{ fontSize: 10, color: 'var(--text-muted)', flexShrink: 0, minWidth: 42, textAlign: 'right' }}>{t.played} gms</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Best Defense */}
+        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
+          <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', background: 'rgba(102,187,106,0.05)' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: '#66bb6a', letterSpacing: '0.08em' }}>🛡️ BEST DEFENSE</span>
+          </div>
+          {bestDefense.map((t, i) => {
+            const maxConceded = Math.max(...bestDefense.map(x => x.conceded), 1);
+            const pct = (t.conceded / maxConceded) * 100;
+            return (
+              <div key={t.name} style={{ padding: '10px 18px', borderBottom: i < bestDefense.length - 1 ? '1px solid rgba(255,255,255,0.04)' : undefined, position: 'relative' }}>
+                <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: `${pct}%`, background: 'rgba(239,83,80,0.05)', pointerEvents: 'none' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}>
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 18, textAlign: 'right', flexShrink: 0 }}>{i + 1}</span>
+                  <span style={{ fontSize: 18 }}>{t.flag}</span>
+                  <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: '#fff', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</span>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: t.conceded === 0 ? '#66bb6a' : '#ddd', flexShrink: 0 }}>
+                    {t.conceded === 0 ? '✓ 0' : t.conceded}
+                  </span>
+                  <span style={{ fontSize: 10, color: 'var(--text-muted)', flexShrink: 0, minWidth: 60, textAlign: 'right' }}>conceded</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Perfect + Scoreless rows */}
+      {perfect.length > 0 && (
+        <div style={{ background: 'var(--bg-card)', border: '1px solid rgba(245,200,66,0.2)', borderRadius: 12, padding: '16px 20px' }}>
+          <div style={{ fontSize: 10, color: 'var(--gold)', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 700, marginBottom: 12 }}>⭐ Perfect Records (all wins)</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+            {perfect.map(t => (
+              <div key={t.name} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(245,200,66,0.08)', border: '1px solid rgba(245,200,66,0.2)', borderRadius: 8, padding: '6px 12px' }}>
+                <span style={{ fontSize: 20 }}>{t.flag}</span>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{t.name}</div>
+                  <div style={{ fontSize: 10, color: 'var(--gold)' }}>{t.wins}W / {t.played} played</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {scoreless.length > 0 && (
+        <div style={{ background: 'var(--bg-card)', border: '1px solid rgba(239,83,80,0.15)', borderRadius: 12, padding: '16px 20px' }}>
+          <div style={{ fontSize: 10, color: 'var(--red)', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 700, marginBottom: 12 }}>❌ Yet to Score</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+            {scoreless.map(t => (
+              <div key={t.name} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(239,83,80,0.07)', border: '1px solid rgba(239,83,80,0.2)', borderRadius: 8, padding: '6px 12px' }}>
+                <span style={{ fontSize: 20 }}>{t.flag}</span>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#ddd' }}>{t.name}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{t.played} games · 0 goals</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <p style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: -16 }}>
+        ↑ All stats computed live from match results. Updates automatically as scores are entered.
+      </p>
     </div>
   );
 }
