@@ -78,6 +78,14 @@ const LONG_DATE: Record<string, string> = {
   '2026-06-26': 'Friday, June 26',   '2026-06-27': 'Saturday, June 27',
   '2026-06-28': 'Sunday, June 28',   '2026-06-29': 'Monday, June 29',
   '2026-06-30': 'Tuesday, June 30',  '2026-07-01': 'Wednesday, July 1',
+  '2026-07-02': 'Thursday, July 2',  '2026-07-03': 'Friday, July 3',
+  '2026-07-04': 'Saturday, July 4',  '2026-07-05': 'Sunday, July 5',
+  '2026-07-06': 'Monday, July 6',    '2026-07-07': 'Tuesday, July 7',
+  '2026-07-09': 'Thursday, July 9',  '2026-07-10': 'Friday, July 10',
+  '2026-07-11': 'Saturday, July 11', '2026-07-12': 'Sunday, July 12',
+  '2026-07-14': 'Tuesday, July 14',  '2026-07-15': 'Wednesday, July 15',
+  '2026-07-17': 'Friday, July 17',   '2026-07-18': 'Saturday, July 18',
+  '2026-07-19': 'Sunday, July 19',
 };
 
 export default function MatchCenterPage({ onCountryClick, onVenueNav }: { onCountryClick?: (name: string) => void; onVenueNav?: (venue: VenueData) => void }) {
@@ -410,15 +418,29 @@ function BracketMatchCard({ match, isFinal, onCountryClick }: {
     ? 'rgba(245,200,66,0.22)'
     : 'var(--border)';
 
+  const hasPens = match?.penScore !== undefined;
+  const penWinner = hasPens
+    ? (match!.penScore![0] > match!.penScore![1] ? 'home' : 'away')
+    : null;
+
   return (
     <div style={{
       height: '100%', background: 'var(--bg-card)',
       border: `1px solid ${borderColor}`,
       borderRadius: 8, display: 'flex', flexDirection: 'column',
       justifyContent: 'center', padding: '6px 8px',
+      position: 'relative',
     }}>
+      {hasPens && (
+        <div style={{
+          position: 'absolute', top: 3, right: 5,
+          fontSize: 8, color: '#f5c842', fontWeight: 700, letterSpacing: '0.08em',
+        }}>PEN</div>
+      )}
       {(['home', 'away'] as const).map((side, si) => {
         const team = match?.[side];
+        const isWinner = penWinner === side;
+        const penGoals = hasPens ? match!.penScore![si] : null;
         return (
           <div key={side} style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: si === 0 ? 4 : 0 }}>
             {team ? (
@@ -426,17 +448,26 @@ function BracketMatchCard({ match, isFinal, onCountryClick }: {
                 <span style={{ fontSize: 13, flexShrink: 0 }}>{team.flag}</span>
                 <span
                   style={{
-                    flex: 1, fontSize: 10, fontWeight: 600, color: 'var(--white)',
+                    flex: 1, fontSize: 10, fontWeight: isWinner ? 700 : 600,
+                    color: isWinner ? 'var(--gold)' : 'var(--white)',
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     cursor: onCountryClick ? 'pointer' : 'default',
                   }}
                   onClick={() => onCountryClick?.(team.name)}
                 >{team.name}</span>
                 {match?.status !== 'upcoming' && (
-                  <span style={{
-                    fontFamily: 'var(--font-display)', fontSize: 13,
-                    color: 'var(--white)', minWidth: 14, textAlign: 'right', flexShrink: 0,
-                  }}>{team.score ?? 0}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
+                    <span style={{
+                      fontFamily: 'var(--font-display)', fontSize: 13,
+                      color: isWinner ? 'var(--gold)' : 'var(--white)',
+                      minWidth: 14, textAlign: 'right',
+                    }}>{team.score ?? 0}</span>
+                    {hasPens && (
+                      <span style={{ fontSize: 9, color: isWinner ? '#f5c842aa' : 'var(--text-muted)', minWidth: 12 }}>
+                        ({penGoals})
+                      </span>
+                    )}
+                  </div>
                 )}
               </>
             ) : (
