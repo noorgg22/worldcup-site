@@ -1,7 +1,7 @@
-import { useState, useMemo, useEffect, useRef, Fragment, type ReactNode } from 'react';
+import { useState, useMemo, useEffect, useRef, type ReactNode } from 'react';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { ALL_MATCHES } from '../data/matches';
-import type { Match, MatchStatsFull, MatchRound } from '../data/matches';
+import type { Match, MatchStatsFull } from '../data/matches';
 import { GROUP_COLORS } from '../data/wcStats';
 import VenueGlobe from '../components/VenueGlobe';
 import Flag from '../components/Flag';
@@ -388,93 +388,152 @@ export default function MatchCenterPage({ onCountryClick, onVenueNav }: { onCoun
 
 
 // ── Knockout Bracket ─────────────────────────────────────────────────────────
-const BR_TOTAL_H = 1088;
-const BR_SLOT_H  = 64;
-const BR_COL_W   = 175;
-const BR_CONN_W  = 32;
-const BR_HEADER_H = 36;
 
-const BR_ROUNDS: { id: MatchRound; label: string; count: number }[] = [
-  { id: 'r32',   label: 'Round of 32',    count: 16 },
-  { id: 'r16',   label: 'Round of 16',    count: 8  },
-  { id: 'qf',    label: 'Quarter-Finals', count: 4  },
-  { id: 'sf',    label: 'Semi-Finals',    count: 2  },
-  { id: 'final', label: 'Final',          count: 1  },
-];
+const B = {
+  cardW: 108, cardH: 54, conn: 22,
+  totalH: 624, hdrH: 44, margin: 8,
+} as const;
+const B_PITCH = B.cardW + B.conn; // 130
 
-function brCardTop(count: number, index: number): number {
-  const spacing = BR_TOTAL_H / count;
-  return index * spacing + (spacing - BR_SLOT_H) / 2;
+const CX = {
+  r32L: B.margin,
+  r16L: B.margin + B_PITCH,
+  qfL:  B.margin + 2 * B_PITCH,
+  sfL:  B.margin + 3 * B_PITCH,
+  fin:  B.margin + 4 * B_PITCH + 28,
+  sfR:  B.margin + 4 * B_PITCH + 28 + B.cardW + 28,
+  qfR:  B.margin + 4 * B_PITCH + 28 + B.cardW + 28 + B_PITCH,
+  r16R: B.margin + 4 * B_PITCH + 28 + B.cardW + 28 + 2 * B_PITCH,
+  r32R: B.margin + 4 * B_PITCH + 28 + B.cardW + 28 + 3 * B_PITCH,
+};
+const B_TOTAL_W = CX.r32R + B.cardW + B.margin;
+
+// Left side R32 match IDs top→bottom
+const L_R32 = ['R3','R6','R1','R4','R12','R11','R10','R9'] as const;
+// Right side R32 match IDs top→bottom
+const R_R32 = ['R2','R5','R7','R8','R15','R14','R13','R16'] as const;
+
+function bTop(slots: number, idx: number): number {
+  const spacing = B.totalH / slots;
+  return B.hdrH + idx * spacing + (spacing - B.cardH) / 2;
 }
 
-function BracketMatchCard({ match, isFinal, onCountryClick }: {
-  match?: Match; isFinal?: boolean; onCountryClick?: (n: string) => void;
+function getWinner(m: Match | undefined): { name: string; flag: string } | null {
+  if (!m || m.status !== 'completed') return null;
+  const h = m.home.score ?? 0, a = m.away.score ?? 0;
+  if (m.penScore) return m.penScore[0] > m.penScore[1]
+    ? { name: m.home.name, flag: m.home.flag }
+    : { name: m.away.name, flag: m.away.flag };
+  if (h > a) return { name: m.home.name, flag: m.home.flag };
+  if (a > h) return { name: m.away.name, flag: m.away.flag };
+  return null;
+}
+
+// BracketCard — compact two-row match card for the bracket
+function BracketCard({
+  match, homeTeam, awayTeam, isFinal, onCountryClick,
+}: {
+  match?: Match;
+  homeTeam?: { name: string; flag: string } | null;
+  awayTeam?: { name: string; flag: string } | null;
+  isFinal?: boolean;
+  onCountryClick?: (n: string) => void;
 }) {
-  const borderColor = match?.status === 'completed'
-    ? 'rgba(102,187,106,0.3)'
+  const hasPens = !!match?.penScore;
+  const penHomePts = hasPens ? match!.penScore![0] : 0;
+  const penAwayPts = hasPens ? match!.penScore![1] : 0;
+
+  // Determine winner side
+  let winnerSide: 'home' | 'away' | null = null;
+  if (match?.status === 'completed') {
+    const h = match.home.score ?? 0, a = match.away.score ?? 0;
+    if (hasPens) winnerSide = penHomePts > penAwayPts ? 'home' : 'away';
+    else if (h > a) winnerSide = 'home';
+    else if (a > h) winnerSide = 'away';
+  }
+
+  const borderColor = isFinal
+    ? 'rgba(245,200,66,0.35)'
     : match?.status === 'live'
     ? 'rgba(239,83,80,0.35)'
-    : isFinal
-    ? 'rgba(245,200,66,0.22)'
     : 'var(--border)';
 
-  const hasPens = match?.penScore !== undefined;
-  const penWinner = hasPens
-    ? (match!.penScore![0] > match!.penScore![1] ? 'home' : 'away')
-    : null;
+  const teams: Array<{ side: 'home' | 'away'; idx: number }> = [
+    { side: 'home', idx: 0 },
+    { side: 'away', idx: 1 },
+  ];
 
   return (
     <div style={{
-      height: '100%', background: 'var(--bg-card)',
+      width: B.cardW, height: B.cardH,
+      background: 'var(--bg-card)',
       border: `1px solid ${borderColor}`,
-      borderRadius: 8, display: 'flex', flexDirection: 'column',
-      justifyContent: 'center', padding: '6px 8px',
+      borderRadius: 6,
+      display: 'flex', flexDirection: 'column', justifyContent: 'center',
+      padding: '0 6px', boxSizing: 'border-box',
       position: 'relative',
     }}>
       {hasPens && (
         <div style={{
-          position: 'absolute', top: 3, right: 5,
-          fontSize: 8, color: '#f5c842', fontWeight: 700, letterSpacing: '0.08em',
+          position: 'absolute', top: 2, right: 4,
+          fontSize: 7, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.08em',
         }}>PEN</div>
       )}
-      {(['home', 'away'] as const).map((side, si) => {
-        const team = match?.[side];
-        const isWinner = penWinner === side;
-        const penGoals = hasPens ? match!.penScore![si] : null;
+
+      {teams.map(({ side, idx }) => {
+        // Determine team display info
+        const directTeam = match ? match[side] : undefined;
+        const fallback = idx === 0 ? homeTeam : awayTeam;
+        const teamName = directTeam?.name ?? fallback?.name;
+        const teamFlag = directTeam?.flag ?? fallback?.flag;
+
+        const isWinner = winnerSide === side;
+        const isLoser  = winnerSide !== null && winnerSide !== side;
+        const score    = directTeam?.score;
+        const penPts   = idx === 0 ? penHomePts : penAwayPts;
+        const showScore = match && match.status !== 'upcoming' && score !== undefined;
+
         return (
-          <div key={side} style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: si === 0 ? 4 : 0 }}>
-            {team ? (
-              <>
-                <span style={{ fontSize: 13, flexShrink: 0 }}>{team.flag}</span>
-                <span
-                  style={{
-                    flex: 1, fontSize: 10, fontWeight: isWinner ? 700 : 600,
-                    color: isWinner ? 'var(--gold)' : 'var(--white)',
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    cursor: onCountryClick ? 'pointer' : 'default',
-                  }}
-                  onClick={() => onCountryClick?.(team.name)}
-                >{team.name}</span>
-                {match?.status !== 'upcoming' && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
-                    <span style={{
-                      fontFamily: 'var(--font-display)', fontSize: 13,
-                      color: isWinner ? 'var(--gold)' : 'var(--white)',
-                      minWidth: 14, textAlign: 'right',
-                    }}>{team.score ?? 0}</span>
-                    {hasPens && (
-                      <span style={{ fontSize: 9, color: isWinner ? '#f5c842aa' : 'var(--text-muted)', minWidth: 12 }}>
-                        ({penGoals})
-                      </span>
-                    )}
-                  </div>
-                )}
-              </>
+          <div
+            key={side}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 4,
+              marginBottom: idx === 0 ? 3 : 0,
+            }}
+          >
+            {teamFlag ? (
+              <span style={{ fontSize: 13, flexShrink: 0, lineHeight: 1 }}>{teamFlag}</span>
             ) : (
-              <>
-                <div style={{ width: 16, height: 16, borderRadius: 3, background: 'rgba(255,255,255,0.05)', flexShrink: 0 }} />
-                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', fontStyle: 'italic' }}>TBD</span>
-              </>
+              <div style={{ width: 13, height: 13, borderRadius: 2, background: 'rgba(255,255,255,0.06)', flexShrink: 0 }} />
+            )}
+
+            <span
+              style={{
+                flex: 1, fontSize: 9,
+                fontWeight: isWinner ? 800 : 600,
+                color: isWinner ? 'var(--white)' : isLoser ? 'rgba(255,255,255,0.38)' : 'rgba(255,255,255,0.7)',
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                textTransform: 'uppercase', letterSpacing: '0.02em',
+                cursor: teamName && onCountryClick ? 'pointer' : 'default',
+              }}
+              onClick={() => teamName && onCountryClick?.(teamName)}
+            >
+              {teamName ? teamName.slice(0, 9) : 'TBD'}
+            </span>
+
+            {showScore && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
+                <span style={{
+                  fontFamily: 'var(--font-display)', fontSize: 13,
+                  color: isWinner ? 'var(--gold)' : isLoser ? 'rgba(255,255,255,0.38)' : 'var(--white)',
+                  minWidth: 10, textAlign: 'right',
+                }}>{score}</span>
+                {hasPens && (
+                  <span style={{ fontSize: 8, color: isWinner ? 'rgba(245,200,66,0.7)' : 'rgba(255,255,255,0.25)' }}>
+                    ({penPts})
+                  </span>
+                )}
+              </div>
             )}
           </div>
         );
@@ -483,75 +542,286 @@ function BracketMatchCard({ match, isFinal, onCountryClick }: {
   );
 }
 
+// Column header label helper
+function ColHeader({ x, label, isFinal }: { x: number; label: string; isFinal?: boolean }) {
+  return (
+    <div style={{
+      position: 'absolute',
+      left: x, top: 0, width: B.cardW, height: B.hdrH,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontSize: 9,
+      color: isFinal ? 'var(--gold)' : 'var(--text-muted)',
+      letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 700,
+    }}>
+      {label}
+    </div>
+  );
+}
+
 function KnockoutBracket({ onCountryClick }: { onCountryClick?: (n: string) => void }) {
-  const koMatches = useMemo(() => ALL_MATCHES.filter(m => m.round !== 'group'), []);
-
-  const byRound = useMemo(() => {
-    const map = new Map<MatchRound, Match[]>();
-    BR_ROUNDS.forEach(r => map.set(r.id, []));
-    koMatches.forEach(m => map.get(m.round)?.push(m));
+  // Build an id→Match map for all knockout matches
+  const matchById = useMemo(() => {
+    const map = new Map<string, Match>();
+    ALL_MATCHES.forEach(m => { if (m.round !== 'group') map.set(m.id, m); });
     return map;
-  }, [koMatches]);
+  }, []);
 
-  const totalW = BR_ROUNDS.length * (BR_COL_W + BR_CONN_W) - BR_CONN_W;
-  const totalContainerH = BR_TOTAL_H + BR_HEADER_H;
+  // All r16/qf/sf/final matches in order they appear in ALL_MATCHES
+  const r16Matches  = useMemo(() => ALL_MATCHES.filter(m => m.round === 'r16'), []);
+  const qfMatches   = useMemo(() => ALL_MATCHES.filter(m => m.round === 'qf'),  []);
+  const sfMatches   = useMemo(() => ALL_MATCHES.filter(m => m.round === 'sf'),  []);
+  const finalMatch  = useMemo(() => ALL_MATCHES.find(m => m.round === 'final'), []);
+
+  // Helper: get winner of a match by id
+  const winnerOf = (id: string) => getWinner(matchById.get(id));
+
+  // Left R32 matches
+  const lR32 = L_R32.map(id => matchById.get(id));
+  // Right R32 matches
+  const rR32 = R_R32.map(id => matchById.get(id));
+
+  // For each left R16 slot (0..3): look up the actual r16 match, or derive home/away from R32 winners
+  const lR16: Array<{ match?: Match; homeTeam?: { name:string;flag:string }|null; awayTeam?: { name:string;flag:string }|null }> =
+    Array.from({ length: 4 }, (_, i) => {
+      const m = r16Matches[i];
+      if (m) return { match: m };
+      return {
+        homeTeam: winnerOf(L_R32[i * 2]),
+        awayTeam: winnerOf(L_R32[i * 2 + 1]),
+      };
+    });
+
+  // For each right R16 slot (0..3): same pattern
+  const rR16: Array<{ match?: Match; homeTeam?: { name:string;flag:string }|null; awayTeam?: { name:string;flag:string }|null }> =
+    Array.from({ length: 4 }, (_, i) => {
+      const m = r16Matches[4 + i];
+      if (m) return { match: m };
+      return {
+        homeTeam: winnerOf(R_R32[i * 2]),
+        awayTeam: winnerOf(R_R32[i * 2 + 1]),
+      };
+    });
+
+  // QF left (0..1)
+  const lQF: Array<{ match?: Match; homeTeam?: { name:string;flag:string }|null; awayTeam?: { name:string;flag:string }|null }> =
+    Array.from({ length: 2 }, (_, i) => {
+      const m = qfMatches[i];
+      if (m) return { match: m };
+      const homeM = lR16[i * 2].match;
+      const awayM = lR16[i * 2 + 1].match;
+      return {
+        homeTeam: homeM ? getWinner(homeM) : lR16[i * 2].homeTeam ?? null,
+        awayTeam: awayM ? getWinner(awayM) : lR16[i * 2 + 1].homeTeam ?? null,
+      };
+    });
+
+  // QF right (0..1)
+  const rQF: Array<{ match?: Match; homeTeam?: { name:string;flag:string }|null; awayTeam?: { name:string;flag:string }|null }> =
+    Array.from({ length: 2 }, (_, i) => {
+      const m = qfMatches[2 + i];
+      if (m) return { match: m };
+      const homeM = rR16[i * 2].match;
+      const awayM = rR16[i * 2 + 1].match;
+      return {
+        homeTeam: homeM ? getWinner(homeM) : rR16[i * 2].homeTeam ?? null,
+        awayTeam: awayM ? getWinner(awayM) : rR16[i * 2 + 1].homeTeam ?? null,
+      };
+    });
+
+  // SF left (0)
+  const lSF = (() => {
+    const m = sfMatches[0];
+    if (m) return { match: m };
+    const homeM = lQF[0].match;
+    const awayM = lQF[1].match;
+    return {
+      homeTeam: homeM ? getWinner(homeM) : lQF[0].homeTeam ?? null,
+      awayTeam: awayM ? getWinner(awayM) : lQF[1].homeTeam ?? null,
+    };
+  })();
+
+  // SF right (0)
+  const rSF = (() => {
+    const m = sfMatches[1];
+    if (m) return { match: m };
+    const homeM = rQF[0].match;
+    const awayM = rQF[1].match;
+    return {
+      homeTeam: homeM ? getWinner(homeM) : rQF[0].homeTeam ?? null,
+      awayTeam: awayM ? getWinner(awayM) : rQF[1].homeTeam ?? null,
+    };
+  })();
+
+  // Final
+  const finalSlot = (() => {
+    if (finalMatch) return { match: finalMatch };
+    const homeM = lSF.match;
+    const awayM = rSF.match;
+    return {
+      homeTeam: homeM ? getWinner(homeM) : lSF.homeTeam ?? null,
+      awayTeam: awayM ? getWinner(awayM) : rSF.homeTeam ?? null,
+    };
+  })();
+
+  // SVG connector helpers
+  // Left side: lines go left→right (from colA right edge to colB left edge)
+  function leftConnectors(colA: number, colB: number, fromSlots: number, toSlots: number) {
+    return Array.from({ length: toSlots }, (_, i) => {
+      const topY = bTop(fromSlots, i * 2) + B.cardH / 2;
+      const botY = bTop(fromSlots, i * 2 + 1) + B.cardH / 2;
+      const midY = (topY + botY) / 2;
+      const x0 = colA + B.cardW;
+      const x1 = colB;
+      return (
+        <g key={i} stroke="rgba(255,255,255,0.12)" strokeWidth={1} fill="none">
+          <line x1={x0} y1={topY} x2={x0} y2={botY} />
+          <line x1={x0} y1={midY} x2={x1} y2={midY} />
+        </g>
+      );
+    });
+  }
+
+  // Right side: lines go right→left (from colA left edge to colB right edge)
+  function rightConnectors(colA: number, colB: number, fromSlots: number, toSlots: number) {
+    return Array.from({ length: toSlots }, (_, i) => {
+      const topY = bTop(fromSlots, i * 2) + B.cardH / 2;
+      const botY = bTop(fromSlots, i * 2 + 1) + B.cardH / 2;
+      const midY = (topY + botY) / 2;
+      const x0 = colA;           // left edge of right-side column
+      const x1 = colB + B.cardW; // right edge of closer column
+      return (
+        <g key={i} stroke="rgba(255,255,255,0.12)" strokeWidth={1} fill="none">
+          <line x1={x0} y1={topY} x2={x0} y2={botY} />
+          <line x1={x0} y1={midY} x2={x1} y2={midY} />
+        </g>
+      );
+    });
+  }
+
+  // Center SF→Final horizontal connectors
+  const sfLCenterY = bTop(1, 0) + B.cardH / 2;
+  const sfRCenterY = bTop(1, 0) + B.cardH / 2;
+  const finCenterY = B.hdrH + B.totalH / 2;
 
   return (
-    <div style={{ overflowX: 'auto', paddingBottom: 24 }}>
-      <div style={{ position: 'relative', width: totalW, height: totalContainerH, minWidth: totalW }}>
+    <div style={{ overflowX: 'auto', padding: '20px 0 24px' }}>
+      <div style={{ position: 'relative', width: B_TOTAL_W, height: B.totalH + B.hdrH, minWidth: B_TOTAL_W }}>
 
-        {BR_ROUNDS.map((round, colIdx) => {
-          const colLeft = colIdx * (BR_COL_W + BR_CONN_W);
-          const matches = byRound.get(round.id) || [];
+        {/* ── Column headers ─────────────────────────────────── */}
+        <ColHeader x={CX.r32L} label="R32" />
+        <ColHeader x={CX.r16L} label="R16" />
+        <ColHeader x={CX.qfL}  label="QF" />
+        <ColHeader x={CX.sfL}  label="SF" />
+        <ColHeader x={CX.fin}  label="FINAL" isFinal />
+        <ColHeader x={CX.sfR}  label="SF" />
+        <ColHeader x={CX.qfR}  label="QF" />
+        <ColHeader x={CX.r16R} label="R16" />
+        <ColHeader x={CX.r32R} label="R32" />
 
-          return (
-            <Fragment key={round.id}>
-              {/* Column header */}
-              <div style={{
-                position: 'absolute', left: colLeft, top: 0, width: BR_COL_W, height: BR_HEADER_H,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 9,
-                color: round.id === 'final' ? 'var(--gold)' : 'var(--text-muted)',
-                letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 700,
-              }}>
-                {round.label}
-              </div>
+        {/* ── SVG connector layer ─────────────────────────────── */}
+        <svg
+          style={{ position: 'absolute', left: 0, top: 0, overflow: 'visible', pointerEvents: 'none' }}
+          width={B_TOTAL_W}
+          height={B.totalH + B.hdrH}
+        >
+          {/* Left side connectors */}
+          {leftConnectors(CX.r32L, CX.r16L, 8, 4)}
+          {leftConnectors(CX.r16L, CX.qfL,  4, 2)}
+          {leftConnectors(CX.qfL,  CX.sfL,  2, 1)}
 
-              {/* Match slots */}
-              {Array.from({ length: round.count }, (_, i) => {
-                const match = matches[i];
-                const top = BR_HEADER_H + brCardTop(round.count, i);
-                return (
-                  <div key={i} style={{ position: 'absolute', left: colLeft, top, width: BR_COL_W, height: BR_SLOT_H }}>
-                    <BracketMatchCard match={match} isFinal={round.id === 'final'} onCountryClick={onCountryClick} />
-                  </div>
-                );
-              })}
+          {/* Right side connectors */}
+          {rightConnectors(CX.sfR,  CX.qfR,  8, 4)}
+          {rightConnectors(CX.qfR,  CX.r16R, 4, 2)}
+          {rightConnectors(CX.r16R, CX.r32R, 2, 1)}
 
-              {/* SVG connectors to next round */}
-              {colIdx < BR_ROUNDS.length - 1 && (
-                <svg
-                  style={{ position: 'absolute', left: colLeft + BR_COL_W, top: 0, overflow: 'visible' }}
-                  width={BR_CONN_W}
-                  height={totalContainerH}
-                >
-                  {Array.from({ length: round.count / 2 }, (_, i) => {
-                    const spacing = BR_TOTAL_H / round.count;
-                    const topY  = BR_HEADER_H + (i * 2)     * spacing + spacing / 2;
-                    const botY  = BR_HEADER_H + (i * 2 + 1) * spacing + spacing / 2;
-                    const midY  = (topY + botY) / 2;
-                    return (
-                      <g key={i} stroke="rgba(255,255,255,0.1)" strokeWidth={1} fill="none">
-                        <line x1={0} y1={topY} x2={0} y2={botY} />
-                        <line x1={0} y1={midY} x2={BR_CONN_W} y2={midY} />
-                      </g>
-                    );
-                  })}
-                </svg>
-              )}
-            </Fragment>
-          );
-        })}
+          {/* SF-Left → Final */}
+          <line
+            x1={CX.sfL + B.cardW} y1={sfLCenterY}
+            x2={CX.fin}            y2={finCenterY}
+            stroke="rgba(255,255,255,0.12)" strokeWidth={1}
+          />
+
+          {/* Final → SF-Right */}
+          <line
+            x1={CX.fin + B.cardW} y1={finCenterY}
+            x2={CX.sfR}            y2={sfRCenterY}
+            stroke="rgba(255,255,255,0.12)" strokeWidth={1}
+          />
+        </svg>
+
+        {/* ── LEFT SIDE ──────────────────────────────────────── */}
+
+        {/* R32 left */}
+        {lR32.map((m, i) => (
+          <div key={i} style={{ position: 'absolute', left: CX.r32L, top: bTop(8, i) }}>
+            <BracketCard match={m} onCountryClick={onCountryClick} />
+          </div>
+        ))}
+
+        {/* R16 left */}
+        {lR16.map((slot, i) => (
+          <div key={i} style={{ position: 'absolute', left: CX.r16L, top: bTop(4, i) }}>
+            <BracketCard {...slot} onCountryClick={onCountryClick} />
+          </div>
+        ))}
+
+        {/* QF left */}
+        {lQF.map((slot, i) => (
+          <div key={i} style={{ position: 'absolute', left: CX.qfL, top: bTop(2, i) }}>
+            <BracketCard {...slot} onCountryClick={onCountryClick} />
+          </div>
+        ))}
+
+        {/* SF left */}
+        <div style={{ position: 'absolute', left: CX.sfL, top: bTop(1, 0) }}>
+          <BracketCard {...lSF} onCountryClick={onCountryClick} />
+        </div>
+
+        {/* ── CENTER — FINAL ─────────────────────────────────── */}
+        <div style={{
+          position: 'absolute',
+          left: CX.fin,
+          top: B.hdrH + B.totalH / 2 - B.cardH / 2 - 20,
+          width: B.cardW,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+        }}>
+          <div style={{
+            fontSize: 8, color: 'var(--gold)', fontWeight: 800,
+            letterSpacing: '0.18em', textTransform: 'uppercase', textAlign: 'center',
+          }}>
+            WORLD CHAMPION
+          </div>
+          <BracketCard {...finalSlot} isFinal onCountryClick={onCountryClick} />
+        </div>
+
+        {/* ── RIGHT SIDE ─────────────────────────────────────── */}
+
+        {/* SF right */}
+        <div style={{ position: 'absolute', left: CX.sfR, top: bTop(1, 0) }}>
+          <BracketCard {...rSF} onCountryClick={onCountryClick} />
+        </div>
+
+        {/* QF right */}
+        {rQF.map((slot, i) => (
+          <div key={i} style={{ position: 'absolute', left: CX.qfR, top: bTop(2, i) }}>
+            <BracketCard {...slot} onCountryClick={onCountryClick} />
+          </div>
+        ))}
+
+        {/* R16 right */}
+        {rR16.map((slot, i) => (
+          <div key={i} style={{ position: 'absolute', left: CX.r16R, top: bTop(4, i) }}>
+            <BracketCard {...slot} onCountryClick={onCountryClick} />
+          </div>
+        ))}
+
+        {/* R32 right */}
+        {rR32.map((m, i) => (
+          <div key={i} style={{ position: 'absolute', left: CX.r32R, top: bTop(8, i) }}>
+            <BracketCard match={m} onCountryClick={onCountryClick} />
+          </div>
+        ))}
+
       </div>
     </div>
   );
