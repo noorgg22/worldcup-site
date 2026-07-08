@@ -9,6 +9,7 @@ import TeamProfilePage from './pages/TeamProfilePage';
 import VenuePage from './pages/VenuePage';
 import MatchCenterPage from './pages/MatchCenterPage';
 import RecordsPage from './pages/RecordsPage';
+import LeadersPage from './pages/LeadersPage';
 import HistoryPage from './pages/HistoryPage';
 import ArticlesPage from './pages/ArticlesPage';
 import PrivacyPage from './pages/PrivacyPage';
@@ -16,7 +17,7 @@ import CountryProfileModal from './components/CountryProfileModal';
 import type { Venue } from './data/venues';
 import type { TeamRoster } from './data/rosters';
 
-export type Page = 'home' | 'groups' | 'roster' | 'teamprofile' | 'venue' | 'matches' | 'records' | 'history' | 'articles' | 'privacy';
+export type Page = 'home' | 'groups' | 'roster' | 'teamprofile' | 'venue' | 'matches' | 'records' | 'leaders' | 'history' | 'articles' | 'privacy';
 
 export default function App() {
   const [history, setHistory] = useState<Page[]>(['home']);
@@ -65,6 +66,7 @@ export default function App() {
       {page === 'teamprofile' && selectedTeam && <TeamProfilePage team={selectedTeam} onBack={navBack} />}
       {page === 'matches'     && <MatchCenterPage onCountryClick={openCountry} onVenueNav={navToVenue} />}
       {page === 'records'     && <RecordsPage onCountryClick={openCountry} />}
+      {page === 'leaders'     && <LeadersPage />}
       {page === 'history'     && <HistoryPage />}
       {page === 'articles'    && <ArticlesPage />}
       {page === 'privacy'     && <PrivacyPage />}
@@ -95,6 +97,7 @@ function Nav({ current, onNav, onBack, canGoBack }: {
     { id: 'matches',     label: 'Matches' },
     { id: 'groups',      label: 'Groups' },
     { id: 'records',     label: 'Records' },
+    { id: 'leaders',     label: 'Leaders' },
     { id: 'history',     label: 'History' },
     { id: 'roster',      label: 'Roster' },
     { id: 'articles',    label: 'Articles' },
